@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ঘুরে দেখো ঢাবি | ঢাবির কতটুকু ঘুরে দেখেছেন?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wdth,wght@75..125,300..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0E6; --surface:#FAFBF6; --ink:#14281F; --muted:#56665C; --line:#D0D8C8;
+  --red:#CF2F28; --green:#0F6A4A; --on-green:#FFFFFF; --chip:#E1E7D7; --scrim:rgba(10,22,16,.62);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1712; --surface:#15221B; --ink:#E6ECE2; --muted:#9AA99E; --line:#29392F;
+    --red:#FF5E52; --green:#5BC796; --on-green:#0B1611; --chip:#1D2C24; --scrim:rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1712; --surface:#15221B; --ink:#E6ECE2; --muted:#9AA99E; --line:#29392F;
+  --red:#FF5E52; --green:#5BC796; --on-green:#0B1611; --chip:#1D2C24; --scrim:rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Anek Bangla","Noto Sans Bengali","Hind Siliguri",system-ui,sans-serif;
+  font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  padding-bottom:88px;
+}
+@media (min-width:960px){body{padding-bottom:0}}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+
+/* header */
+.top{max-width:1200px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-stretch:112%;font-size:1.12rem}
+.brand svg{width:26px;height:26px;flex:none}
+.lang{background:transparent;border:1.5px solid var(--ink);border-radius:999px;padding:5px 14px;font-weight:600;cursor:pointer}
+.lang:hover{background:var(--ink);color:var(--bg)}
+
+/* hero */
+.hero{max-width:1200px;margin:0 auto;padding:18px 20px 0}
+.hero h1{margin:0;font-size:clamp(2.3rem,6.4vw,5rem);font-weight:800;font-stretch:125%;line-height:1.1;letter-spacing:-.012em;max-width:15ch}
+html[lang="en"] .hero h1{max-width:17ch}
+.lede{margin:16px 0 0;max-width:54ch;color:var(--muted);font-size:1.12rem}
+
+/* tool */
+.tool{max-width:1200px;margin:26px auto 0;padding:0 20px;display:grid;gap:20px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:960px){.tool{grid-template-columns:minmax(0,1.42fr) minmax(330px,1fr);align-items:start}}
+.mapcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+.mapbox{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);line-height:0;transition:background .25s}
+.mapbox svg{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+.mapbox.zoomed svg{touch-action:none;cursor:grab}
+.mapbox.dragging svg{cursor:grabbing}
+.mapbox .detail{transition:opacity .2s}
+.mapbox.deep .detail{opacity:1}
+.zoom{position:absolute;bottom:10px;left:10px;z-index:2;display:flex;gap:6px;line-height:1}
+.zoom button{width:38px;height:38px;display:grid;place-items:center;padding:0;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.45rem;font-weight:700;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.zoom button:hover:not(:disabled){border-color:var(--ink)}
+.zoom button:disabled{opacity:.45;cursor:default}
+.zoom svg{width:18px;height:18px}
+@media (max-width:520px){.zoom button{width:34px;height:34px;font-size:1.3rem}}
+.zhint{position:absolute;left:50%;top:50%;z-index:3;transform:translate(-50%,-50%);max-width:80%;text-align:center;background:rgba(10,22,16,.8);color:#fff;padding:10px 16px;border-radius:12px;font-size:.95rem;line-height:1.4;opacity:0;pointer-events:none;transition:opacity .2s}
+.zhint.show{opacity:1}
+.pin{cursor:pointer;outline:none}
+.pin .dot{transform-box:fill-box;transform-origin:center}
+.pin:hover .dot{stroke-width:4.5}
+.blk .shp{transition:fill .2s ease, stroke .2s ease}
+.blk:hover .shp{filter:brightness(.93)}
+.blk:focus-visible .shp{stroke:var(--red);stroke-width:3;stroke-opacity:1}
+.blk.flash .shp{animation:flash .45s ease}
+@keyframes flash{0%{opacity:1}35%{opacity:.45}100%{opacity:1}}
+.pin:hover .lbl,.pin:focus-visible .lbl{visibility:visible}
+.pin:focus-visible .ring{opacity:1}
+.pin.pop .dot{animation:pop .34s ease}
+@keyframes pop{0%{transform:scale(1)}45%{transform:scale(1.5)}100%{transform:scale(1)}}
+.legend{margin:0;padding:0 4px;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.92rem}
+.legend i{width:22px;height:14px;border-radius:3px;flex:none;border:1.5px solid var(--red);background:repeating-linear-gradient(45deg,var(--red) 0 3px,transparent 3px 7px);opacity:.75}
+.caption{margin:0;padding:0 4px;color:var(--muted);font-size:.98rem;min-height:3.1em}
+.caption b{color:var(--ink);font-weight:700}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 16px 10px}
+@media (min-width:960px){
+  .panel{position:sticky;top:calc(14px + env(safe-area-inset-top,0px))}
+  .list{max-height:calc(100vh - 400px);min-height:240px;overflow:auto;overscroll-behavior:contain;padding-right:4px}
+}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:0 4px}
+.phead h2{margin:0;font-size:1.3rem;font-weight:700;line-height:1.25}
+.count{font-weight:800;font-stretch:75%;font-size:2.7rem;line-height:.9;color:var(--red);white-space:nowrap;font-variant-numeric:tabular-nums}
+.field{display:block;margin:16px 4px 0;font-size:.92rem;font-weight:600;color:var(--muted)}
+.field input{display:block;width:100%;margin-top:6px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);font-size:1rem;font-weight:500;color:var(--ink)}
+.field input:focus{border-color:var(--ink);outline:none}
+.tlabel{margin:16px 4px 8px;font-size:.92rem;font-weight:600;color:var(--muted)}
+.themes{display:flex;flex-wrap:wrap;gap:8px;padding:0 4px}
+.sw{display:flex;align-items:center;gap:8px;background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:4px 12px 4px 4px;font-size:.92rem;cursor:pointer}
+.sw i{width:24px;height:24px;border-radius:50%;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14)}
+.sw[aria-pressed="true"]{border-color:var(--ink);font-weight:700}
+.bulk{display:flex;gap:8px;margin:16px 4px 6px}
+.ghost{flex:1;background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.92rem;font-weight:600;cursor:pointer}
+.ghost:hover{border-color:var(--ink)}
+.grp h3{margin:16px 8px 4px;font-size:.95rem;font-weight:700;color:var(--green)}
+.item{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:12px;padding:7px 8px;border-radius:10px;cursor:pointer}
+.item:hover{background:var(--chip)}
+.item input{appearance:none;-webkit-appearance:none;width:22px;height:22px;margin:0;border:2px solid var(--ink);border-radius:6px;background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.item input:checked{background:var(--red);border-color:var(--red)}
+.item input:checked::after{content:"";width:11px;height:6px;border-left:2.6px solid #fff;border-bottom:2.6px solid #fff;transform:translateY(-1px) rotate(-45deg)}
+.item b{display:block;font-weight:650;line-height:1.3}
+.item span{display:block;color:var(--muted);font-size:.9rem;line-height:1.4;margin-top:2px}
+
+/* verdict */
+.verdict{max-width:1200px;margin:40px auto 0;padding:0 20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4.4vw,48px);display:grid;gap:26px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:780px){.card{grid-template-columns:minmax(0,1fr) 220px;align-items:start}}
+.stamp{order:-1;justify-self:center;width:200px;height:200px;border-radius:50%;border:4px solid var(--red);color:var(--red);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px;transform:rotate(-11deg)}
+@media (min-width:780px){.stamp{order:0;margin-top:6px}}
+.stamp::before{content:"";position:absolute;inset:9px;border:2px dashed currentColor;border-radius:50%;opacity:.65}
+.stamp .sp{font-weight:800;font-stretch:75%;font-size:3.1rem;line-height:1;font-variant-numeric:tabular-nums}
+.stamp .st{font-weight:700;font-stretch:80%;font-size:1.08rem;line-height:1.15;margin-top:6px}
+.stamp.hit{animation:stamp .5s cubic-bezier(.2,.9,.3,1.25)}
+@keyframes stamp{0%{transform:rotate(-26deg) scale(1.75);opacity:0}55%{opacity:1}100%{transform:rotate(-11deg) scale(1)}}
+.who{margin:0;color:var(--muted);font-weight:600}
+.score{margin:6px 0 0;font-size:clamp(1.25rem,2.6vw,1.6rem);font-weight:600;line-height:1.35;max-width:36ch}
+.meter{height:10px;margin-top:14px;max-width:520px;border-radius:999px;background:var(--chip);overflow:hidden}
+.meter span{display:block;height:100%;width:0;background:var(--red);border-radius:inherit;transition:width .45s ease}
+.compliment{margin:26px 0 0;font-size:clamp(1.55rem,3.6vw,2.45rem);font-weight:700;font-stretch:84%;line-height:1.28;max-width:24ch;text-wrap:balance}
+html[lang="en"] .compliment{max-width:28ch}
+.badges{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
+.badges li{display:flex;gap:10px;align-items:flex-start;background:var(--chip);border-radius:14px;padding:10px 14px 10px 10px;max-width:310px}
+.badges .e{font-size:1.45rem;line-height:1.1}
+.badges b{display:block;font-weight:700;line-height:1.25}
+.badges small{display:block;color:var(--muted);font-size:.86rem;line-height:1.35;margin-top:2px}
+.next{margin:22px 0 0;color:var(--muted);max-width:60ch}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.btn{border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;border:1.5px solid var(--ink);background:transparent}
+.btn.primary{background:var(--green);border-color:var(--green);color:var(--on-green)}
+.btn:hover{filter:brightness(1.06)}
+.btn[disabled]{opacity:.6;cursor:progress}
+
+footer{max-width:1200px;margin:48px auto 0;padding:22px 20px 34px;border-top:1px solid var(--line);color:var(--muted);font-size:.92rem}
+footer p{margin:0;max-width:70ch}
+.social{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
+.social span{font-weight:700;color:var(--ink);margin-right:6px}
+.social a{display:inline-flex;align-items:center;gap:6px;color:var(--ink);text-decoration:none;font-weight:600;border:1.5px solid var(--line);border-radius:999px;padding:6px 12px 6px 14px}
+.social a svg{width:14px;height:14px}
+.social a:hover{border-color:var(--ink);background:var(--chip)}
+
+/* mobile dock */
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:center;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);transition:transform .25s ease}
+.dock.away{transform:translateY(110%)}
+.dock .dc{font-weight:800;font-stretch:75%;font-size:1.7rem;line-height:1;color:var(--red);font-variant-numeric:tabular-nums}
+.dock .dt{flex:1;min-width:0;font-size:.95rem;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock .btn{padding:8px 12px;font-size:.92rem}
+@media (min-width:960px){.dock{display:none}}
+
+/* preview overlay */
+.ov{position:fixed;inset:0;z-index:50;background:var(--scrim);display:none;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.ov.open{display:flex}
+.ovc{background:var(--surface);border-radius:20px;padding:16px;width:100%;max-width:480px;max-height:100%;overflow:auto}
+.ovc h2{margin:2px 4px 12px;font-size:1.2rem}
+.ovc img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
+.ovc .hint{margin:10px 4px 0;color:var(--muted);font-size:.9rem}
+.ovc .actions{margin-top:14px}
+.ovc .actions .btn{flex:1 1 auto}
+
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:.95rem;transition:opacity .2s,transform .2s;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (min-width:960px){.toast{bottom:calc(28px + env(safe-area-inset-bottom,0px))}}
+
+@media (prefers-reduced-motion: reduce){
+  .stamp.hit,.pin.pop .dot{animation:none}
+  .meter span,.dock,.toast{transition:none}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="7" fill="#0F6A4A"/><circle cx="12" cy="13" r="6.2" fill="#CF2F28"/></svg>
+    <span data-t="brand">ঘুরে দেখো ঢাবি</span>
+  </div>
+  <button class="lang" id="langBtn" type="button">English</button>
+</header>
+
+<section class="hero">
+  <h1 data-t="title">ঢাবির কতটুকু ঘুরে দেখেছেন?</h1>
+  <p class="lede" data-t="lede"></p>
+</section>
+
+<main class="tool">
+  <div class="mapcol">
+    <div class="mapbox" id="mapbox">
+      <div id="mapsvg"></div>
+      <div class="zoom" role="group" id="zoomBar">
+        <button type="button" id="zIn">+</button>
+        <button type="button" id="zOut">−</button>
+        <button type="button" id="zReset"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+      <div class="zhint" id="zhint" aria-hidden="true"></div>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+  </div>
+
+  <aside class="panel" aria-labelledby="panelTitle">
+    <div class="phead">
+      <h2 id="panelTitle" data-t="panel"></h2>
+      <span class="count" id="count">০ / ২২</span>
+    </div>
+    <label class="field"><span data-t="nameLabel"></span>
+      <input id="name" type="text" maxlength="40" autocomplete="given-name">
+    </label>
+    <p class="tlabel" id="themeLabel" data-t="themeLabel"></p>
+    <div class="themes" id="themes" role="group" aria-labelledby="themeLabel"></div>
+    <div class="bulk">
+      <button class="ghost" type="button" id="allBtn" data-t="all"></button>
+      <button class="ghost" type="button" id="noneBtn" data-t="none"></button>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+</main>
+
+<section class="verdict" id="verdict" aria-live="polite">
+  <div class="card">
+    <div>
+      <p class="who" id="who"></p>
+      <p class="score" id="score"></p>
+      <div class="meter" aria-hidden="true"><span id="meter"></span></div>
+      <p class="compliment" id="compliment"></p>
+      <ul class="badges" id="badges"></ul>
+      <p class="next" id="next"></p>
+      <div class="actions">
+        <button class="btn primary" type="button" id="imgBtn" data-t="makeImg"></button>
+        <button class="btn" type="button" id="copyBtn" data-t="copy"></button>
+      </div>
+    </div>
+    <div class="stamp" id="stamp"><span class="sp" id="stampPct">০%</span><span class="st" id="stampTitle"></span></div>
+  </div>
+</section>
+
+<footer>
+  <div class="social">
+    <span data-t="maker"></span>
+    <a href="https://www.facebook.com/mahir.alvi.ridvi" target="_blank" rel="noopener noreferrer">Facebook<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a href="https://www.instagram.com/__mahir.alvi__/" target="_blank" rel="noopener noreferrer">Instagram<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    <a href="https://www.linkedin.com/in/ridvi/" target="_blank" rel="noopener noreferrer">LinkedIn<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </div>
+</footer>
+
+<div class="dock" id="dock">
+  <span class="dc" id="dockCount">০/২২</span>
+  <span class="dt" id="dockTitle"></span>
+  <button class="btn primary" type="button" id="dockBtn" data-t="dockBtn"></button>
+</div>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovTitle">
+  <div class="ovc">
+    <h2 id="ovTitle" data-t="pvTitle"></h2>
+    <img id="ovImg" alt="">
+    <p class="hint" id="ovHint"></p>
+    <div class="actions">
+      <button class="btn primary" type="button" id="dlBtn" data-t="download" hidden></button>
+      <button class="btn" type="button" id="shareBtn" data-t="share" hidden></button>
+      <button class="btn" type="button" id="ovClose" data-t="close"></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+"use strict";
+
+/* ---------- data ---------- */
+// Every place is a block. Coordinates are traced from the printed DU campus map
+// (photo pixel coords fx, fy). shape: poly (area), ell (oval), pt (small landmark), line (road).
+// k: fill kind for areas  b = building, g = green, w = water.
+const SPOTS = [
+  /* ---- Northern Hall Para ---- */
+
+  /* ---- Admin & the Mall ---- */
+  {id:'registrar', g:'admin', pr:9, force:true, shape:{t:'poly', k:'b', p:[[302,274],[343,274],[343,354],[302,354]]}, bn:['রেজিস্ট্রার ভবন','ফর্ম, সিল আর “কাল আসেন” শোনার প্রশাসনিক ঠিকানা।'], en:['Registrar Building','Forms, stamps and “come back tomorrow”, all under one roof.']},
+  {id:'senate', g:'admin', pr:5, shape:{t:'poly', k:'b', p:[[262,284],[300,284],[300,354],[262,354]]}, bn:['নবাব নওয়াব আলী চৌধুরী সিনেট ভবন','বড় সভা, বড় বক্তৃতা; ঢুকলেই নিজেকে ভিআইপি লাগে।','সিনেট ভবন'], en:['Nawab Nawab Ali Chowdhury Senate Bhaban','Big meetings, bigger speeches; walking in makes you feel like a VIP.','Senate Bhaban']},
+  {id:'mall', g:'admin', pr:8, shape:{t:'poly', k:'g', p:[[347,272],[410,272],[410,448],[347,448]], l:[378,395]}, bn:['মল চত্বর','গাছের ছায়ায় হাঁটা আর ক্লাস ফাঁকির রাজপথ।'], en:['Mall Chattar','Shady walks, and the main road of skipped classes.']},
+  {id:'hallpara', g:'admin', pr:8, shape:{t:'multi', parts:[{k:'g', p:[[388,145],[434,145],[434,266],[388,266]]},{k:'b', p:[[438,84],[512,86],[512,138],[438,138]]},{k:'b', p:[[382,84],[434,84],[434,140],[338,140]]},{k:'b', p:[[438,163],[512,163],[512,212],[438,212]]},{k:'b', p:[[322,143],[385,143],[385,212],[267,212]]},{k:'b', p:[[265,215],[385,215],[385,264],[227,264]]},{k:'b', p:[[438,215],[512,215],[512,264],[438,264]]}], l:[411,200]}, bn:['হলপাড়া','পাতলা ডাল, গাঢ় বন্ধুত্ব আর মাঝরাতের আড্ডার পাড়া।'], en:['Hall Para','Watery dal, thick friendships and midnight adda.']},
+  {id:'vc', g:'admin', pr:6, shape:{t:'ell', k:'g', c:[398,505], rx:38, ry:32}, bn:['ভিসি চত্বর','মিছিল আর প্রতিবাদের আরেক চেনা মোড়।'], en:['VC Chattar','Another familiar corner for rallies and protests.']},
+  {id:'smriti', g:'admin', pr:4, d:'l', shape:{t:'pt', c:[338,478]}, bn:['স্মৃতি চিরন্তন','একাত্তরের শহীদ শিক্ষক, শিক্ষার্থী ও কর্মচারীদের স্মরণে।'], en:['Smriti Chironton','In memory of DU’s teachers, students and staff killed in 1971.']},
+
+  /* ---- Arts side ---- */
+  {id:'fbs', g:'arts', pr:7, shape:{t:'poly', k:'b', p:[[415,272],[505,272],[505,320],[415,320]]}, bn:['ব্যবসায় শিক্ষা অনুষদ (এফবিএস)','প্রেজেন্টেশন, ফরমাল ড্রেস আর কেস কম্পিটিশনের রাজ্য।','এফবিএস'], en:['Faculty of Business Studies (FBS)','Land of presentations, formal wear and case competitions.','FBS']},
+  {id:'kolabhaban', g:'arts', pr:9, shape:{t:'poly', k:'b', p:[[418,346],[528,346],[528,394],[418,394]]}, bn:['কলা ভবন','ক্লাস, করিডোরের আড্ডা আর জানালা দিয়ে বটতলা দেখা।'], en:['Kola Bhaban (Arts Building)','Classes, corridor adda and a window view of Bot Tola.','Kola Bhaban']},
+  {id:'aparajeyo', g:'arts', pr:9, d:'b', shape:{t:'pt', c:[470,405]}, bn:['অপরাজেয় বাংলা','কলা ভবনের সামনে মুক্তিযুদ্ধের অদম্য তিন মূর্তি।'], en:['Aparajeyo Bangla','Three unbeatable figures of 1971, guarding the Arts building.','Aparajeyo']},
+  {id:'bottola', g:'arts', pr:5, d:'b', shape:{t:'pt', c:[430,420]}, bn:['বটতলা','কলা ভবনের বটগাছ, বহু ঐতিহাসিক সমাবেশের সাক্ষী।'], en:['Bot Tola','The Arts building banyan, witness to historic rallies.']},
+  {id:'nazrul', g:'arts', pr:6, shape:{t:'poly', k:'g', p:[[605,300],[667,300],[667,330],[605,330]]}, bn:['কবি নজরুলের সমাধি','জাতীয় কবি এখানে শুয়ে আছেন, মসজিদের পাশে।','নজরুল সমাধি'], en:['Kazi Nazrul Islam’s Grave','The national poet rests here, beside the mosque.','Nazrul’s Grave']},
+  {id:'charukala', g:'arts', pr:8, shape:{t:'poly', k:'b', p:[[520,226],[667,226],[667,298],[520,298]], l:[630,262]}, bn:['চারুকলা অনুষদ','দেয়ালে দেয়ালে ছবি, বৈশাখে মুখোশ আর রঙের উৎসব।','চারুকলা'], en:['Faculty of Fine Arts','Murals on every wall, masks and colour every Boishakh.','Charukala']},
+  {id:'ducsu', g:'arts', pr:6, shape:{t:'poly', k:'b', p:[[533,360],[569,360],[569,396],[533,396]]}, bn:['ডাকসু ভবন','ক্যাম্পাসের নির্বাচন, দাবি আর বিতর্কের ঠিকানা।','ডাকসু'], en:['DUCSU Building','Home of campus elections, demands and debates.','DUCSU']},
+  {id:'modhu', g:'arts', pr:8, shape:{t:'poly', k:'b', p:[[571,360],[600,360],[600,396],[571,396]]}, bn:['মধুর ক্যান্টিন','মধুদার ক্যান্টিন, ক্যাম্পাস রাজনীতির পুরনো আড্ডাঘর।'], en:['Modhur Canteen','Madhu-da’s canteen, the old living room of campus politics.']},
+  {id:'library', g:'arts', pr:9, shape:{t:'poly', k:'b', p:[[603,375],[667,375],[667,446],[603,446]]}, bn:['কেন্দ্রীয় লাইব্রেরি','ভোরবেলা ব্যাগ রেখে সিট দখলের অলিম্পিক।','লাইব্রেরি'], en:['Central Library','Where bags queue at dawn to claim a seat.','Library']},
+  {id:'hakim', g:'arts', pr:6, d:'l', shape:{t:'pt', c:[640,455]}, bn:['হাকিম চত্বর','চা, আড্ডা আর “কাল থেকে সিরিয়াসলি পড়ব”।'], en:['Hakim Chattar','Tea, adda and “I’ll study seriously from tomorrow.”']},
+
+  /* ---- TSC, Udyan, Shahbagh ---- */
+  {id:'shahbagh', g:'tsc', pr:9, d:'r', shape:{t:'pt', c:[690,74]}, bn:['শাহবাগ','জ্যামে বসে জীবনদর্শন শেখার মোড়।'], en:['Shahbagh','The junction where traffic jams teach philosophy.']},
+  {id:'museum', g:'tsc', pr:7, shape:{t:'poly', k:'b', p:[[516,92],[665,92],[665,182],[516,182]], l:[600,150]}, bn:['জাতীয় জাদুঘর','হাজার বছরের ইতিহাস এক ছাদের নিচে, শাহবাগের মোড়েই।'], en:['National Museum','A thousand years of history under one roof, right at Shahbagh.']},
+  {id:'suhrawardy', g:'tsc', pr:9, shape:{t:'poly', k:'g', p:[[706,128],[992,128],[994,760],[968,768],[860,652],[760,548],[706,494]], l:[860,380]}, bn:['সোহরাওয়ার্দী উদ্যান','একাত্তরের ইতিহাসের মাঠ, এখন সকালের হাঁটার ট্র্যাক।'], en:['Suhrawardy Udyan','A field full of 1971 history, now a morning-walk track.']},
+  {id:'muktomancha', g:'tsc', pr:6, d:'r', shape:{t:'pt', c:[762,470]}, bn:['মুক্তমঞ্চ','খোলা আকাশের নিচে গান, নাটক আর প্রতিবাদ।'], en:['Muktomancha','Open-air stage for songs, plays and protests.']},
+  {id:'raju', g:'tsc', pr:9, d:'r', shape:{t:'pt', c:[683,485]}, bn:['রাজু ভাস্কর্য','দাবি-দাওয়া জানানোর ক্যাম্পাসের চিরচেনা ঠিকানা।'], en:['Raju Sculpture','Campus’s go-to address for making demands.']},
+  {id:'tsc', g:'tsc', pr:10, force:true, shape:{t:'poly', k:'b', p:[[662,512],[722,505],[776,556],[742,590],[662,590]]}, bn:['টিএসসি','ক্লাসের চেয়ে বেশি সময় যেখানে কাটে।'], en:['TSC','Where you spend more time than in class.']},
+  {id:'dumetro', g:'tsc', pr:7, d:'r', shape:{t:'pt', c:[790,586]}, bn:['ঢাবি মেট্রো স্টেশন','জ্যাম এড়িয়ে ক্লাসে পৌঁছানোর একমাত্র শর্টকাট।','মেট্রো স্টেশন'], en:['Dhaka University Metro Station','The only shortcut to class that beats the jam.','DU Metro']},
+  {id:'banglaacademy', g:'tsc', pr:8, shape:{t:'poly', k:'b', p:[[728,632],[812,632],[866,688],[856,706],[728,706]]}, bn:['বাংলা একাডেমি','ফেব্রুয়ারিতে বইমেলা, বাকি বছর বর্ধমান হাউসের নীরবতা।'], en:['Bangla Academy','Book fair in February, Burdwan House calm the rest of the year.']},
+
+  /* ---- Nilkhet to Jagannath ---- */
+  {id:'nilkhet', g:'south', pr:7, shape:{t:'poly', k:'b', p:[[18,402],[64,402],[64,446],[18,446]]}, bn:['নীলক্ষেত','সস্তা ফটোকপি আর পুরনো বইয়ের সমুদ্র।'], en:['Nilkhet','An ocean of cheap photocopies and second-hand books.']},
+  {id:'toron', g:'south', pr:6, d:'b', shape:{t:'pt', c:[112,458]}, bn:['মুক্তি ও গণতন্ত্র তোরণ','নীলক্ষেত দিয়ে ক্যাম্পাসে ঢোকার রাজকীয় দরজা।','তোরণ'], en:['Liberation and Democracy Gate','The grand doorway into campus from Nilkhet.','Toron Gate']},
+  {id:'barkat', g:'south', pr:4, d:'r', shape:{t:'pt', c:[218,808]}, bn:['ভাষা শহীদ আবুল বরকত স্মৃতি জাদুঘর','পলাশীর মোড়ে ভাষা শহীদের স্মৃতিঘর।','বরকত জাদুঘর'], en:['Language Martyr Abul Barkat Museum','A museum for a Language Movement martyr, at Palashi.','Barkat Museum']},
+  {id:'fuller', g:'south', pr:6, shape:{t:'line', p:[[340,458],[352,520],[392,575],[400,650],[408,735],[430,785]], l:[396,690]}, bn:['ফুলার রোড','সন্ধ্যার হাঁটা, চা আর গাছের সারি।'], en:['Fuller Road','Evening walks, tea and rows of trees.']},
+  {id:'sangram', g:'south', pr:4, d:'l', shape:{t:'pt', c:[403,722]}, bn:['স্বাধীনতা সংগ্রাম ভাস্কর্য','ভাস্কর্যের ভিড়ে ইতিহাসের পুরো একটা ক্লাস।','স্বাধীনতা সংগ্রাম'], en:['Swadhinata Sangram Sculpture','A whole history lesson told in sculpture.','Swadhinata Sangram']},
+  {id:'jagannath', g:'south', pr:7, shape:{t:'multi', parts:[{k:'b', p:[[472,642],[562,642],[562,798],[472,798]]},{k:'g', p:[[566,632],[646,632],[646,745],[566,745]]}], l:[517,770]}, bn:['জগন্নাথ হল','ঢাবির প্রথম তিন হলের একটি, উৎসবে আলোয় ঝলমলে।'], en:['Jagannath Hall','One of DU’s first three halls, glowing at festival time.']},
+
+  /* ---- Shaheed Minar to Curzon ---- */
+  {id:'minar', g:'curzon', pr:10, shape:{t:'poly', k:'b', p:[[715,790],[784,846],[715,898],[648,846]]}, bn:['কেন্দ্রীয় শহীদ মিনার','একুশের প্রথম প্রহরে খালি পায়ে ফুল।','শহীদ মিনার'], en:['Central Shaheed Minar','Barefoot flowers at the first hour of Ekushe.','Shaheed Minar']},
+  {id:'motahar', g:'curzon', pr:6, shape:{t:'poly', k:'b', p:[[788,742],[848,742],[848,834],[808,842],[786,800]], l:[817,810]}, bn:['কাজী মোতাহার হোসেন ভবন','দাবাড়ু-পরিসংখ্যানবিদের নামে ভবন, রাস্তার ওপারেই শহীদ মিনার।','মোতাহার ভবন'], en:['Kazi Motahar Hossain Bhaban','Named after the chess-champion statistician, right across from the Shaheed Minar.','Motahar Bhaban']},
+  {id:'mokarram', g:'curzon', pr:6, shape:{t:'poly', k:'b', p:[[856,752],[922,752],[970,794],[970,814],[856,838]], l:[906,776]}, bn:['মোকাররম ভবন','বিজ্ঞানের ক্লাস, ল্যাব আর লিফটের লম্বা লাইন।'], en:['Mokarram Bhaban','Science classes, labs and the long lift queue.']},
+  {id:'gym', g:'curzon', pr:4, shape:{t:'poly', k:'b', p:[[848,846],[905,846],[905,880],[848,880]]}, bn:['শারীরিক শিক্ষা কেন্দ্র (জিমনেসিয়াম)','পরীক্ষার আগে পেশি আর মনোবল দুটোই বানানোর জায়গা।','জিমনেসিয়াম'], en:['Physical Education Centre (Gymnasium)','Build muscles and morale before exams.','Gymnasium']},
+  {id:'pool', g:'curzon', pr:4, shape:{t:'poly', k:'w', p:[[952,842],[1000,842],[1000,876],[952,876]]}, bn:['সুইমিং পুল','গরমে ক্যাম্পাসের সবচেয়ে ঠান্ডা জায়গা।'], en:['Swimming Pool','The coolest spot on campus in summer.']},
+  {id:'centralfield', g:'curzon', pr:7, shape:{t:'poly', k:'g', p:[[849,886],[1003,882],[1005,1042],[990,1044]], l:[960,945]}, bn:['কেন্দ্রীয় খেলার মাঠ','আন্তঃহল খেলা, সমাবর্তন আর বিকেলের ফুটবল।'], en:['Central Field','Inter-hall matches, convocations and evening football.']},
+  {id:'dhakagate', g:'curzon', pr:6, d:'l', shape:{t:'pt', c:[966,774]}, bn:['ঢাকা গেট','মুঘল আমলের তোরণ, চোখের সামনে থেকেও অদেখা।'], en:['Dhaka Gate','A Mughal-era gate everyone passes and nobody sees.']},
+  {id:'doel', g:'curzon', pr:8, d:'t', shape:{t:'pt', c:[1015,815]}, bn:['দোয়েল চত্বর','জাতীয় পাখির ভাস্কর্য আর হস্তশিল্পের দোকান।'], en:['Doel Chattar','The national-bird sculpture and handicraft stalls.']},
+  {id:'curzon', g:'curzon', pr:10, shape:{t:'multi', parts:[{k:'g', p:[[1048,822],[1292,818],[1296,846],[1046,846]]},{k:'b', p:[[1046,847],[1297,846],[1299,931],[1046,933]]}], l:[1172,892]}, bn:['কার্জন হল','লাল ইটের সৌন্দর্য, ফটোশুটের স্থায়ী ঠিকানা।'], en:['Curzon Hall','Red-brick beauty and a permanent photoshoot venue.']},
+  {id:'shahidullahhall', g:'curzon', pr:6, shape:{t:'poly', k:'b', p:[[1078,938],[1155,938],[1155,1005],[1078,1005]]}, bn:['শহীদুল্লাহ হল','ঢাকা হল নামে শুরু, ঢাবির প্রথম তিন হলের একটি।'], en:['Shahidullah Hall','Began as Dhaka Hall, one of DU’s first three halls.']},
+  {id:'shahidullah', g:'curzon', pr:6, shape:{t:'poly', k:'w', p:[[1160,940],[1225,940],[1225,1030],[1160,1030]]}, bn:['শহীদুল্লাহ হলের পুকুর','পুকুরপাড়ে বসে কবিতা লেখা (বা ঘুম)।','হলের পুকুর'], en:['Shahidullah Hall Pond','Pond-side poetry (or naps).','Hall Pond']},
+  {id:'fazlul', g:'curzon', pr:6, shape:{t:'poly', k:'b', p:[[1228,936],[1302,936],[1302,1000],[1228,1000]]}, bn:['ফজলুল হক মুসলিম হল','পুকুরের ওপারে শহীদুল্লাহ হলের চিরকালের প্রতিবেশী।','ফজলুল হক হল'], en:['Fazlul Huq Muslim Hall','Shahidullah Hall’s eternal neighbour across the pond.','Fazlul Huq Hall']}
+];
+// Always-marked halls (all women's halls and some others): shown striped, never selectable, never counted.
+const FIXED = [
+  {id:'afrahman', fixed:true, g:'halls', pr:5, shape:{t:'poly', k:'b', p:[[130,400],[200,400],[200,452],[108,452]]}, bn:['স্যার এ এফ রহমান হল','নীলক্ষেতের গা ঘেঁষা, ফটোকপির দোকান হাতের নাগালে।','এ এফ রহমান হল'], en:['Sir A F Rahman Hall','Hugging Nilkhet, photocopies within arm’s reach.','A F Rahman Hall']},
+  {id:'mohsin', fixed:true, g:'halls', pr:6, shape:{t:'poly', k:'b', p:[[214,278],[252,278],[252,362],[148,362]]}, bn:['হাজী মুহম্মদ মুহসীন হল','দানবীরের নামে হল, মাঠের পাশেই।','মুহসীন হল'], en:['Haji Muhammad Mohsin Hall','Named after the great philanthropist, right by the field.','Mohsin Hall']},
+  {id:'zahurul', fixed:true, g:'south', pr:6, shape:{t:'poly', k:'b', p:[[82,562],[246,562],[246,656],[96,656]]}, bn:['শহীদ সার্জেন্ট জহুরুল হক হল','বিশাল পুকুর আর নিজের মাঠওয়ালা হল।','জহুরুল হক হল'], en:['Shahid Sergeant Zahurul Haq Hall','The hall with a huge pond and its own field.','Zahurul Haq Hall']},
+  {id:'salimullah', fixed:true, g:'south', pr:7, shape:{t:'poly', k:'b', p:[[252,632],[365,632],[365,750],[252,750]]}, bn:['সলিমুল্লাহ মুসলিম হল','চারকোনা আঙিনার ঐতিহ্যবাহী হল, প্রথম তিন হলের একটি।','সলিমুল্লাহ হল'], en:['Salimullah Muslim Hall','Heritage quadrangle hall, one of DU’s first three.','Salimullah Hall']},
+  {id:'amarekushe', fixed:true, g:'curzon', pr:5, shape:{t:'poly', k:'b', p:[[1120,1048],[1232,1048],[1232,1096],[1120,1096]]}, bn:['অমর একুশে হল','কার্জনপাড়ার দক্ষিণ মাথার হল।'], en:['Amar Ekushe Hall','The hall at the south end of the Curzon side.']},
+  {id:'rokeya', fixed:true, g:'south', pr:6, shape:{t:'poly', k:'b', p:[[452,462],[612,465],[628,505],[560,528],[452,528]]}, bn:['রোকেয়া হল','ঢাবির সবচেয়ে পুরনো ছাত্রী হল।'], en:['Rokeya Hall','DU’s oldest hall for women.']},
+  {id:'faizunnesa', fixed:true, g:'south', pr:4, shape:{t:'poly', k:'b', p:[[428,531],[520,531],[520,575],[422,575]]}, bn:['নবাব ফয়জুন্নেসা চৌধুরানী ছাত্রী নিবাস','রোকেয়া হলের পাশের ছাত্রী নিবাস।','ফয়জুন্নেসা'], en:['Nawab Faizunnesa Chowdhurani Hall','The women’s residence next to Rokeya Hall.','Faizunnesa']},
+  {id:'shamsunnahar', fixed:true, g:'south', pr:6, shape:{t:'poly', k:'b', p:[[523,532],[630,510],[644,560],[642,612],[523,612]]}, bn:['শামসুন নাহার হল','টিএসসির সবচেয়ে কাছের ছাত্রী হল।'], en:['Shamsun Nahar Hall','The women’s hall closest to TSC.']},
+  {id:'sufiakamal', fixed:true, g:'curzon', pr:5, shape:{t:'poly', k:'b', p:[[1336,925],[1398,925],[1398,998],[1336,998]]}, bn:['কবি সুফিয়া কামাল হল','কার্জনপাড়ার পূর্বে, ছাত্রীদের নতুন হল।','সুফিয়া কামাল হল'], en:['Kabi Sufia Kamal Hall','The newer women’s hall, east of the Curzon side.','Sufia Kamal Hall']}
+];
+const TOTAL = SPOTS.length;
+const GROUPS = ['admin','arts','tsc','south','curzon'];
+const PRIORITY = ['curzon','tsc','minar','museum','kolabhaban','library','raju','aparajeyo','charukala','modhu','dumetro','shahbagh','suhrawardy','banglaacademy','doel','dhakagate','hallpara','registrar','mall','toron','salimullah','jagannath','shahidullah','centralfield','mokarram','motahar','fuller','nilkhet','senate','ducsu','hakim','bottola','smriti','sangram','muktomancha','fbs','vc'];
+
+const THEMES = {
+  flag:   {bn:'লাল-সবুজ', en:'Red & green', map:{paper:'#F3F5EE',block:'#E1E7D9',bld:'#D2DBC4',green:'#C4DBB3',tree:'#93C188',water:'#B5D8E6',road:'#FFFFFF',edge:'#D2DACA',ink:'#15392B',pin:'#FFFFFF',accent:'#D7322A',tick:'#FFFFFF',muted:'#738279'}},
+  curzon: {bn:'কার্জনের ইট', en:'Curzon brick', map:{paper:'#F7ECE1',block:'#EBD5C1',bld:'#E3C6AC',green:'#D4D9AF',tree:'#ABBA80',water:'#BFD8DA',road:'#FFFBF6',edge:'#E2C8B0',ink:'#4B1D12',pin:'#FFF8F1',accent:'#A8321D',tick:'#FFFFFF',muted:'#8E6D5E'}},
+  night:  {bn:'রাতের টিএসসি', en:'TSC at night', map:{paper:'#0F1B33',block:'#1B2B4F',bld:'#273C68',green:'#173A3A',tree:'#22534D',water:'#18406A',road:'#283D69',edge:'#1A2C51',ink:'#F1E9D2',pin:'#0F1B33',accent:'#FFB703',tick:'#0F1B33',muted:'#8E9BB8'}},
+  krishna:{bn:'কৃষ্ণচূড়া', en:'Krishnachura', map:{paper:'#FFF5ED',block:'#FBE0D0',bld:'#F5CDB6',green:'#D3E7BB',tree:'#F06A3E',water:'#C2E2EE',road:'#FFFFFF',edge:'#F2CBB6',ink:'#5A1730',pin:'#FFFFFF',accent:'#E2431C',tick:'#FFFFFF',muted:'#99696F'}}
+};
+
+// a compliment that only makes sense for certain selections
+const when = (test, fn) => { fn.when = test; return fn; };
+const RANKS = [
+  {min:0,max:0,
+   bn:{t:'অদৃশ্য শিক্ষার্থী',c:[
+     ()=>'আপনি কি আসলেই ঢাবিতে পড়েন, নাকি অ্যাডমিশন ফর্ম কিনেই থেমে গেছেন?',
+     ()=>'ক্যাম্পাস আপনাকে চেনে না, আপনিও ক্যাম্পাসকে না। দুই পক্ষই বেশ শান্তিতে আছে।',
+     ()=>'ম্যাপটা খুলেছেন, এটাই আপাতত ক্যাম্পাসে আপনার সবচেয়ে বড় সফর।',
+     ()=>'আপনার ক্যাম্পাস-জীবন এখনও অ্যাডমিট কার্ডের ছবির মতো: আছে, কিন্তু কেউ দেখেনি।',
+     ()=>'একটা জায়গাতেও টিক নেই। ক্যাম্পাস আপনাকে এড়াচ্ছে, নাকি আপনি ক্যাম্পাসকে?']},
+   en:{t:'The Invisible Student',c:[
+     ()=>'Do you actually study at DU, or did you stop after buying the admission form?',
+     ()=>"The campus doesn't know you and you don't know the campus. Both sides seem at peace.",
+     ()=>"You opened the map. So far, that's your biggest campus trip.",
+     ()=>"Your campus life is like your admit-card photo: it exists, but nobody's seen it.",
+     ()=>'Not a single tick. Is the campus avoiding you, or are you avoiding it?']}},
+  {min:1,max:3,
+   bn:{t:'হল-ক্লাস লুপ',c:[
+     ()=>'হল থেকে ক্লাস, ক্লাস থেকে হল। ক্যাম্পাসের বাকি অংশ আপনার কাছে এখনো গুজব।',
+     ()=>'আপনার ক্যাম্পাস-ম্যাপ এত ছোট যে গুগল ম্যাপস জুম আউট করতে লজ্জা পায়।',
+     ()=>'যে কয়টা জায়গা চেনেন, আঙুলে গোনা যায়; তারপরও কয়েকটা আঙুল বেঁচে যায়।',
+     when(s=>s.has('library') && !s.has('tsc'), ()=>'লাইব্রেরির সিট চেনেন, টিএসসির চা চেনেন না। সিজিপিএ ভালো, গল্প কম।'),
+     when(s=>s.has('nilkhet'), ()=>'নীলক্ষেত চেনেন, কারণ ফটোকপি ছাড়া সেমিস্টার পার হয় না। বাকি ক্যাম্পাস পরে দেখা যাবে।'),
+     when(s=>s.has('dumetro'), ()=>'মেট্রো থেকে নেমে সোজা ক্লাস, ক্লাস থেকে সোজা মেট্রো। ক্যাম্পাস আপনার কাছে একটা স্টেশন মাত্র।')]},
+   en:{t:'Hall–Class Loop',c:[
+     ()=>'Hall to class, class to hall. The rest of campus is still just a rumour to you.',
+     ()=>'Your campus map is so small that Google Maps is embarrassed to zoom out.',
+     ()=>'You can count the places you know on your fingers, with fingers to spare.',
+     when(s=>s.has('library') && !s.has('tsc'), ()=>'You know the library seats but not TSC tea. Great CGPA, few stories.'),
+     when(s=>s.has('nilkhet'), ()=>'You know Nilkhet because no semester survives without photocopies. The rest of campus can wait.'),
+     when(s=>s.has('dumetro'), ()=>'Off the metro, straight to class, straight back. Campus is just a station to you.')]}},
+  {min:4,max:7,
+   bn:{t:'চা-স্টলের নাগরিক',c:[
+     when(s=>s.has('tsc') && !s.has('curzon'), ()=>'টিএসসির মামা জানেন আপনার চায়ে কয় চামচ চিনি, কিন্তু কার্জন হল এখনও আপনার নাম জানে না।'),
+     when(s=>s.has('curzon') && !s.has('tsc'), ()=>'কার্জন হলের লাল ইট আপনাকে চেনে, কিন্তু টিএসসির এক কাপ চা এখনও আপনার অপেক্ষায়।'),
+     ()=>'শুরুটা দারুণ! আপনি আবিষ্কার করেছেন যে ক্লাসরুমের বাইরেও একটা পৃথিবী আছে।',
+     ()=>'ক্যাম্পাসটা আপনার কাছে এখন ট্রেলারের মতো; পুরো সিনেমা এখনও বাকি।',
+     when(s=>s.has('modhu') && s.has('ducsu'), ()=>'মধুর ক্যান্টিনে চা, ডাকসুর সামনে আড্ডা; ক্যাম্পাসের খবর আপনার কাছে সবার আগে পৌঁছায়।'),
+     when(s=>s.has('shahbagh') && !s.has('suhrawardy'), ()=>'শাহবাগের জ্যামে বহুবার আটকেছেন, কিন্তু পাশের উদ্যানে এখনও পা রাখা হয়নি।'),
+     when(s=>s.has('charukala'), ()=>'চারুকলার দেয়ালের ছবি আপনার ফোনের গ্যালারিতে আছে; এবার বাকি ক্যাম্পাসের পালা।')]},
+   en:{t:'Tea-Stall Citizen',c:[
+     when(s=>s.has('tsc') && !s.has('curzon'), ()=>'The tea mama at TSC knows exactly how much sugar you take, but Curzon Hall still has no idea who you are.'),
+     when(s=>s.has('curzon') && !s.has('tsc'), ()=>"Curzon Hall's red bricks know you, but a cup of TSC tea is still waiting for you."),
+     ()=>"Strong start! You've discovered there's a whole world outside the classroom.",
+     ()=>'Campus is still a trailer for you; the full film is yet to come.',
+     when(s=>s.has('modhu') && s.has('ducsu'), ()=>'Tea at Modhur Canteen, adda outside DUCSU; campus news reaches you first.'),
+     when(s=>s.has('shahbagh') && !s.has('suhrawardy'), ()=>"You've been stuck in Shahbagh traffic plenty of times, but never stepped into the Udyan next door."),
+     when(s=>s.has('charukala'), ()=>"Charukala's murals are already in your phone gallery. Time for the rest of campus.")]}},
+  {min:8,max:11,
+   bn:{t:'হাফ-ক্যাম্পাস অভিযাত্রী',c:[
+     ()=>'অর্ধেক ক্যাম্পাস নিজের চোখে দেখেছেন, বাকি অর্ধেক বন্ধুদের ইনস্টাগ্রাম স্টোরিতে।',
+     ()=>'আপনি জুনিয়রদের আত্মবিশ্বাসের সাথে রাস্তা দেখান, তারপর নিজেই উল্টো দিকে হাঁটা দেন।',
+     ()=>'বন্ধুরা কোনো জায়গার নাম বললে আপনি এখন আর "ওটা কোথায়?" জিজ্ঞেস করেন না।',
+     ()=>'ক্যাম্পাসের অর্ধেক আপনার চেনা; বাকি অর্ধেক আপনার সাথে পরিচিত হওয়ার অপেক্ষায়।',
+     when(s=>s.has('library') && s.has('tsc'), ()=>'সকালে লাইব্রেরি, বিকেলে টিএসসি; ভারসাম্যটা আপনি ভালোই ধরে রেখেছেন।'),
+     when(s=>s.has('curzon') && !s.has('kolabhaban'), ()=>'কার্জনপাড়া আপনার চেনা, কিন্তু কলা ভবনের করিডোর এখনও অচেনা। বিজ্ঞানের মানুষ, বোঝাই যাচ্ছে।'),
+     when(s=>s.has('kolabhaban') && !s.has('curzon'), ()=>'কলা ভবন আপনার দ্বিতীয় বাড়ি, কিন্তু কার্জন হল এখনও শুধু ছবিতে দেখা।')]},
+   en:{t:'Half-Campus Explorer',c:[
+     ()=>"You've seen half the campus in person and the other half on your friends' Instagram stories.",
+     ()=>'You give juniors directions with total confidence, then walk off the other way yourself.',
+     ()=>"When friends name a spot, you no longer ask 'where's that?'.",
+     ()=>'You know half the campus; the other half is still waiting to meet you.',
+     when(s=>s.has('library') && s.has('tsc'), ()=>"Library by morning, TSC by evening. You've found the balance."),
+     when(s=>s.has('curzon') && !s.has('kolabhaban'), ()=>'You know the Curzon side, but the Kola Bhaban corridors are still strangers. Science person, clearly.'),
+     when(s=>s.has('kolabhaban') && !s.has('curzon'), ()=>'Kola Bhaban is your second home, but Curzon Hall is still something you know from photos.')]}},
+  {min:12,max:16,
+   bn:{t:'ক্যাম্পাস সিনিয়র',c:[
+     ()=>'রিকশাওয়ালা মামারা ভাড়া চাওয়ার আগে আপনার কাছে রাস্তা জিজ্ঞেস করেন।',
+     ()=>'আপনার জুতার তলা এখন ঢাবির মাটির জিআই ট্যাগ পাওয়ার যোগ্য।',
+     ()=>'ক্যাম্পাসের সব শর্টকাট আপনার মুখস্থ; হেঁটেই আপনি সবার আগে পৌঁছে যান।',
+     ()=>'ক্যাম্পাসে কোনো প্রোগ্রাম হলে বন্ধুরা আগে আপনাকেই ফোন দেয়: "জায়গাটা কোথায় রে?"',
+     when(s=>s.has('doel') && s.has('dhakagate'), ()=>'দোয়েল চত্বর থেকে ঢাকা গেট, ক্যাম্পাসের পূর্ব সীমান্ত আপনার মুখস্থ।'),
+     when(s=>s.has('minar') && s.has('banglaacademy') && s.has('suhrawardy'), ()=>'শহীদ মিনার, বইমেলা আর উদ্যানের সন্ধ্যা; ক্যাম্পাসের ক্যালেন্ডারটা আপনার মুখস্থ।')]},
+   en:{t:'Campus Senior',c:[
+     ()=>'Rickshaw mamas ask you for directions before they ask for the fare.',
+     ()=>'The soles of your shoes have officially earned a GI tag for DU soil.',
+     ()=>'You know every campus shortcut by heart and still arrive first on foot.',
+     ()=>"Whenever there's an event, friends call you first: 'where's that place again?'",
+     when(s=>s.has('doel') && s.has('dhakagate'), ()=>'From Doel Chattar to Dhaka Gate, you know the eastern frontier by heart.'),
+     when(s=>s.has('minar') && s.has('banglaacademy') && s.has('suhrawardy'), ()=>'The Minar, the book fair, evenings in the Udyan; you know the campus calendar by heart.')]}},
+  {min:17,max:21,
+   bn:{t:'চলন্ত উইকিপিডিয়া',c:[
+     ()=>'আপনি ক্যাম্পাসের চলন্ত উইকিপিডিয়া। ফ্রেশাররা আপনাকে ট্যুর গাইড হিসেবে ভাড়া করতে চায়।',
+     ()=>'গর্বিত ঢাবিয়ান বলতে যা বোঝায়, আপনি ঠিক তাই; ক্যাম্পাসের প্রতিটি কোণে আপনার পায়ের ছাপ।',
+     ()=>'ক্যাম্পাসে আপনাকে কেউ কখনো হারিয়ে যেতে দেখেনি; উল্টো হারিয়ে যাওয়াদের আপনিই খুঁজে আনেন।',
+     when(s=>!s.has('shahbagh'), ()=>'প্রায় পুরো ক্যাম্পাস ঘুরেছেন, অথচ শাহবাগ বাদ? জ্যামকে এত ভয়?'),
+     when(s=>!s.has('minar'), ()=>'এত ঘোরার পরও শহীদ মিনার বাকি? এবারের একুশে আর মিস করবেন না।'),
+     when(s=>!s.has('library'), ()=>'ক্যাম্পাসের প্রায় সব কোণে আপনার পা পড়েছে, শুধু লাইব্রেরিটা বাকি। কাকতালীয় নিশ্চয়ই।')]},
+   en:{t:'Walking Wikipedia',c:[
+     ()=>"You're the campus's walking Wikipedia. Freshers want to hire you as a tour guide.",
+     ()=>'A proud Dhabian through and through; your footprints are in every corner of campus.',
+     ()=>"Nobody has ever seen you lost on campus; you're the one who finds the lost ones.",
+     when(s=>!s.has('shahbagh'), ()=>'Almost all of campus, but you skipped Shahbagh? That scared of the traffic?'),
+     when(s=>!s.has('minar'), ()=>"All this and the Shaheed Minar is still left? Don't miss it this Ekushe."),
+     when(s=>!s.has('library'), ()=>"You've set foot in nearly every corner except the library. Pure coincidence, surely.")]}},
+  {min:22,max:22,
+   bn:{t:'ঢাবির জীবন্ত ল্যান্ডমার্ক',c:[
+     n=>n?`পুরো ক্যাম্পাস শেষ! এবার একটা চত্বরের নাম রাখা উচিত “${n} চত্বর”।`:'পুরো ক্যাম্পাস শেষ! এবার আপনার নামে একটা চত্বর হওয়া উচিত।',
+     ()=>'আপনি এত ঘুরেছেন যে কার্জন হলের লাল ইটও আপনাকে দেখে সালাম দেয়।',
+     ()=>'পুরো ক্যাম্পাস শেষ! এখন একটাই কাজ বাকি: পরের বছর জুনিয়রদের ক্যাম্পাস ট্যুর দেওয়া।',
+     ()=>'পুরো ক্যাম্পাস ঘোরা শেষ। এবার বাকি শুধু সমাবর্তনের গাউন পরে আরেকটা চক্কর।']},
+   en:{t:"DU's Living Landmark",c:[
+     n=>n?`Campus complete! Time they named a chattar after you: “${n} Chattar”.`:'Campus complete! Time they named a chattar after you.',
+     ()=>"You've walked so much that even Curzon Hall's red bricks salute you.",
+     ()=>'Campus complete! Only one job left: giving the juniors a campus tour next year.',
+     ()=>'Every corner done. All that’s left is one more lap in a convocation gown.']}}
+];
+
+const BADGES = [
+  {e:'☕', when:s=>s.has('tsc')&&s.has('modhu')&&s.has('hakim'), bn:['আড্ডায় পিএইচডি','টিএসসি, মধুর ক্যান্টিন আর হাকিম চত্বর, তিনটাই।'], en:['PhD in Adda','TSC, Modhur Canteen and Hakim Chattar, all three.']},
+  {e:'📚', when:s=>s.has('library')&&!s.has('tsc')&&!s.has('hakim'), bn:['সিট-দখল চ্যাম্পিয়ন','লাইব্রেরি আছে, আড্ডার জায়গা নেই। বিসিএস প্রস্তুতি চলছে বুঝি?'], en:['Seat-Grab Champion','Library yes, adda spots no. BCS prep, is it?']},
+  {e:'🏛️', when:s=>s.has('curzon')&&s.has('dhakagate')&&s.has('minar'), bn:['ইতিহাস শিকারি','কার্জন হল, ঢাকা গেট আর শহীদ মিনার।'], en:['History Hunter','Curzon Hall, Dhaka Gate and the Shaheed Minar.']},
+  {e:'✊', when:s=>['aparajeyo','raju','smriti','sangram'].every(x=>s.has(x)), bn:['ভাস্কর্য বিশারদ','চারটি বিখ্যাত ভাস্কর্যই দেখা শেষ।'], en:['Sculpture Scholar','All four famous sculptures, seen.']},
+  {e:'📄', when:s=>s.has('nilkhet')&&!s.has('library'), bn:['ফটোকপি মাস্টার','নীলক্ষেত চেনেন, লাইব্রেরি চেনেন না।'], en:['Photocopy Master','Knows Nilkhet, has never met the library.']},
+  {e:'🌳', when:s=>s.has('fuller')&&s.has('suhrawardy')&&s.has('mall'), bn:['সন্ধ্যার হাঁটা-বিশেষজ্ঞ','ফুলার রোড, মল চত্বর আর উদ্যান।'], en:['Evening Walker','Fuller Road, the Mall and the Udyan.']},
+  {e:'🎉', when:s=>s.has('charukala')&&s.has('banglaacademy')&&s.has('minar'), bn:['উৎসবের নিয়মিত মুখ','বৈশাখ, বইমেলা আর একুশ, কিছুই বাদ যায় না।'], en:['Festival Regular','Boishakh, the book fair and Ekushe, never misses one.']},
+  {e:'🗳️', when:s=>s.has('ducsu')&&s.has('modhu')&&s.has('vc'), bn:['প্রচারণা মোড','ডাকসু, মধুর ক্যান্টিন আর ভিসি চত্বর। নির্বাচনে দাঁড়াচ্ছেন নাকি?'], en:['Campaign Mode','DUCSU, Modhur Canteen and VC Chattar. Running for something?']},
+  {e:'🤝', when:s=>s.has('mokarram')&&s.has('fbs'), bn:['দুই অনুষদের দূত','মোকাররম আর এফবিএস দুটোই ঘোরা, বিজ্ঞান আর বাণিজ্যের সন্ধি।'], en:['Cross-Faculty Diplomat','Both Mokarram and FBS. Science and business at peace.']},
+  {e:'🎤', when:s=>s.has('muktomancha')&&s.has('tsc')&&s.has('charukala'), bn:['মঞ্চের মানুষ','মুক্তমঞ্চ, টিএসসি আর চারুকলা, সব অনুষ্ঠানেই হাজির।'], en:['Stage Regular','Muktomancha, TSC and Charukala. Never misses a show.']},
+  {e:'🚪', when:s=>s.has('toron')&&s.has('dhakagate'), bn:['তোরণ-রক্ষী','মুক্তি ও গণতন্ত্র তোরণ আর মুঘল আমলের ঢাকা গেট, দুটোই পেরিয়েছেন।'], en:['Gatekeeper','Walked through both the Toron Gate and the Mughal-era Dhaka Gate.']},
+  {e:'📝', when:s=>s.has('registrar')&&s.has('senate'), bn:['কাগজপত্র সারভাইভার','রেজিস্ট্রার ভবন আর সিনেট ভবন, দুটো থেকেই কাজ সেরে বেরিয়ে এসেছেন।'], en:['Paperwork Survivor','Made it out of both the Registrar Building and the Senate Bhaban.']},
+  {e:'🚦', when:s=>s.has('shahbagh')&&s.has('nilkhet'), bn:['জ্যাম সারভাইভার','শাহবাগ আর নীলক্ষেত, দুই জ্যামই পার করেছেন।'], en:['Traffic Survivor','Survived both the Shahbagh and Nilkhet jams.']}
+];
+
+const STR = {
+  bn:{
+    brand:'ঘুরে দেখো ঢাবি', lang:'English', title:'ঢাবির কতটুকু ঘুরে দেখেছেন?',
+    docTitle:'ঘুরে দেখো ঢাবি | ঢাবির কতটুকু ঘুরে দেখেছেন?',
+    lede:'যেসব জায়গায় গিয়েছেন, ম্যাপে বা তালিকায় সেগুলো চিহ্নিত করুন। ক্যাম্পাস আপনাকে নিয়ে কী ভাবে, নিচেই লেখা থাকবে।',
+    mapAria:'ঢাকা বিশ্ববিদ্যালয় ক্যাম্পাসের আঁকা ম্যাপ',
+    capIdle:'ম্যাপের কোনো জায়গায় চাপ দিলে সেটি বাছাই হবে, আর এখানে তার গল্প দেখাবে। দুই আঙুলে টেনে বা + / − বাটনে জুম করুন।',
+    zIn:'জুম ইন', zOut:'জুম আউট', zReset:'পুরো ম্যাপ দেখুন', zoomBar:'ম্যাপ জুম',
+    wheelHint:k=>`জুম করতে ${k} চেপে ধরে স্ক্রল করুন`, artsBldg:'কলা ভবন', kniAve:'কাজী নজরুল ইসলাম এভিনিউ', fullerRd:'ফুলার রোড', dmc:'ঢাকা মেডিকেল কলেজ', buet:'বুয়েট', metro:'মেট্রোরেল', nilkhetRd:'নীলক্ষেত রোড', sonargaonRd:'সোনারগাঁও রোড', newElephantRd:'নিউ এলিফ্যান্ট রোড', museum:'জাতীয় জাদুঘর', pubLib:'সুফিয়া কামাল গণগ্রন্থাগার', highcourt:'হাইকোর্ট',
+    capOn:'যোগ হলো।', capOff:'তালিকা থেকে বাদ পড়ল।',
+    panel:'যেসব জায়গায় গিয়েছি', nameLabel:'আপনার নাম (ঐচ্ছিক)', namePh:'যেমন: রাফি',
+    themeLabel:'ম্যাপের থিম', all:'সব বাছাই করুন', none:'সব মুছুন',
+    groups:{admin:'প্রশাসন, মল চত্বর ও হলপাড়া',arts:'কলা ভবন এলাকা',tsc:'শাহবাগ, উদ্যান ও টিএসসি',south:'নীলক্ষেত থেকে জগন্নাথ হল',curzon:'শহীদ মিনার থেকে কার্জন হল'},
+    report:n=>n?`${n}-এর ক্যাম্পাস রিপোর্ট`:'আপনার ক্যাম্পাস রিপোর্ট',
+    score:(n,t,p)=>`${t}টির মধ্যে ${n}টি জায়গা ঘুরেছেন, অর্থাৎ ক্যাম্পাসের ${p}%।`,
+    next:l=>`পরের ক্লাসের ফাঁকে ঘুরে আসুন: ${l}।`, and:' ও ',
+    nextDone:'সব জায়গা দেখা শেষ। এবার পরীক্ষার হলটাও একবার ঘুরে আসুন।',
+    makeImg:'ছবি বানান', copy:'লেখা কপি করুন', copied:'লেখা কপি হয়েছে',
+    copyFail:'কপি করা যায়নি। লেখাটি হাতে সিলেক্ট করে কপি করুন।',
+    pvTitle:'আপনার ক্যাম্পাস ম্যাপ', download:'PNG ডাউনলোড করুন', close:'বন্ধ করুন',
+    pvHintSave:'ছবিটি ফোনে রাখতে ডাউনলোড করুন, বা সরাসরি শেয়ার করুন।', dlStarted:'ডাউনলোড শুরু হচ্ছে। শুরু না হলে ছবিটিতে চেপে ধরে সেভ করুন।', share:'শেয়ার করুন', shareFail:'শেয়ার করা যায়নি।',
+    pvHint:'ছবিটিতে চেপে ধরে বা রাইট-ক্লিক করে সেভ করুন।',
+    making:'ছবি তৈরি হচ্ছে…', saved:'ছবি ডাউনলোড হয়েছে', declined:'ডাউনলোড বাতিল হয়েছে',
+    imgFail:'ছবি বানানো যায়নি। আবার চেষ্টা করুন।',
+    dockBtn:'মন্তব্য দেখুন', womenNote:'দাগানো ব্লকগুলো ছাত্রী হল: সবসময় চিহ্নিত থাকে, বাছাই করা যায় না, পয়েন্টেও গোনা হয় না।', womenTip:'সবসময় চিহ্নিত, পয়েন্টে গোনা হয় না', maker:'Mahir Alvi Ridvi',
+    foot:'ঘুরে দেখো ঢাবি একটি মজার, অনানুষ্ঠানিক প্রজেক্ট; ঢাকা বিশ্ববিদ্যালয়ের সাথে এর কোনো আনুষ্ঠানিক সম্পর্ক নেই। ম্যাপটি OpenStreetMap-ভিত্তিক মানচিত্র অনুসরণ করে আঁকা (© OpenStreetMap contributors); কাছাকাছি জায়গার নাম দেখতে জুম করুন। ভাবনাটি Unseen Bangladesh থেকে অনুপ্রাণিত।',
+    note:'ম্যাপ ডেটা © OpenStreetMap contributors', north:'উ',
+    imgHead:(n,p)=>n?`${n} ঢাবির ${p}% ঘুরে দেখেছেন`:`ঢাবির ${p}% ঘুরে দেখেছি`,
+    imgSub:(n,t)=>`${t}টির মধ্যে ${n}টি জায়গা`
+  },
+  en:{
+    brand:'Ghure Dekho DU', lang:'বাংলা', title:'How much of DU have you actually seen?',
+    docTitle:'Ghure Dekho DU | How much of DU have you actually seen?',
+    lede:"Mark the places you've been, on the map or in the list. What the campus thinks of you appears right below.",
+    mapAria:'Illustrated map of the University of Dhaka campus',
+    capIdle:"Tap any place on the map to mark it, and its story shows up here. Pinch, or use the + and − buttons, to zoom.",
+    zIn:'Zoom in', zOut:'Zoom out', zReset:'Show whole map', zoomBar:'Map zoom',
+    wheelHint:k=>`Hold ${k} and scroll to zoom`, artsBldg:'Arts Building', kniAve:'Kazi Nazrul Islam Avenue', fullerRd:'Fuller Road', dmc:'Dhaka Medical College', buet:'BUET', metro:'Metro Rail', nilkhetRd:'Nilkhet Road', sonargaonRd:'Sonargaon Road', newElephantRd:'New Elephant Road', museum:'National Museum', pubLib:'Sufia Kamal Public Library', highcourt:'High Court',
+    capOn:'added.', capOff:'removed from your list.',
+    panel:"Places I've been", nameLabel:'Your name (optional)', namePh:'e.g. Rafi',
+    themeLabel:'Map theme', all:'Select all', none:'Clear all',
+    groups:{admin:'Admin, the Mall and Hall Para',arts:'Around Kola Bhaban',tsc:'Shahbagh, the Udyan and TSC',south:'Nilkhet to Jagannath Hall',curzon:'Shaheed Minar to Curzon Hall'},
+    report:n=>n?`${n}'s campus report`:'Your campus report',
+    score:(n,t,p)=>`You've been to ${n} of ${t} places, which is ${p}% of campus.`,
+    next:l=>`Between classes, go see ${l}.`, and:' and ',
+    nextDone:'Nothing left to see. Maybe visit the exam hall once.',
+    makeImg:'Make image', copy:'Copy text', copied:'Text copied',
+    copyFail:"Couldn't copy. Select the text and copy it manually.",
+    pvTitle:'Your campus map', download:'Download PNG', close:'Close',
+    pvHintSave:'Download the image to keep it, or share it directly.', dlStarted:"Downloading. If nothing happens, long-press the image to save it.", share:'Share', shareFail:"Couldn't share.",
+    pvHint:'Long-press or right-click the image to save it.',
+    making:'Making image…', saved:'Image downloaded', declined:'Download cancelled',
+    imgFail:"Couldn't make the image. Try again.",
+    dockBtn:'See verdict', womenNote:"Striped blocks are women's halls: always marked, not selectable and not counted in your score.", womenTip:'always marked, not counted', maker:'Mahir Alvi Ridvi',
+    foot:'Ghure Dekho DU is a just-for-fun, unofficial project with no official link to the University of Dhaka. The map is traced from an OpenStreetMap-based map (© OpenStreetMap contributors); zoom in to see the names of places that sit close together. Inspired by Unseen Bangladesh.',
+    note:'Map data © OpenStreetMap contributors', north:'N',
+    imgHead:(n,p)=>n?`${n} has seen ${p}% of DU`:`I've seen ${p}% of DU`,
+    imgSub:(n,t)=>`${n} of ${t} places`
+  }
+};
+
+/* ---------- state ---------- */
+const KEY = 'unseen-du-v1';
+const state = {sel:new Set(), theme:'flag', lang:'bn', name:''};
+try{
+  const raw = localStorage.getItem(KEY);
+  if(raw){
+    const o = JSON.parse(raw);
+    if(Array.isArray(o.sel)) o.sel.forEach(id=>{ if(SPOTS.some(s=>s.id===id)) state.sel.add(id); });
+    if(o.theme && THEMES[o.theme]) state.theme = o.theme;
+    if(o.lang==='en'||o.lang==='bn') state.lang = o.lang;
+    if(typeof o.name==='string') state.name = o.name.slice(0,40);
+  }
+}catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({sel:[...state.sel],theme:state.theme,lang:state.lang,name:state.name})); }catch(e){} }
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const L = () => STR[state.lang];
+const BN_DIG = '০১২৩৪৫৬৭৮৯';
+const fmt = n => state.lang==='bn' ? String(n).replace(/\d/g, d=>BN_DIG[d]) : String(n);
+const pct = n => Math.round(n/TOTAL*100);
+const spot = id => SPOTS.find(s=>s.id===id) || FIXED.find(s=>s.id===id);
+const fullName = s => s[state.lang][0];
+const mapName = s => s[state.lang][2] || s[state.lang][0];
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cleanName = () => state.name.trim();
+function joinList(arr){
+  if(arr.length<=1) return arr.join('');
+  return arr.slice(0,-1).join(', ') + L().and + arr[arr.length-1];
+}
+
+/* ---------- map ---------- */
+// Traced from the printed Dhaka University campus map (photo pixel coords).
+const MAP_W = 1400, MAP_H = 1080;
+const T = (fx,fy) => [fx-10, fy-40];
+const f1 = n => (+n).toFixed(1);
+const path = (pts, close) => pts.map((q,i)=>{ const [x,y] = T(q[0],q[1]); return (i?'L':'M')+f1(x)+','+f1(y); }).join(' ') + (close?' Z':'');
+const isPt = sp => sp.shape.t === 'pt';
+function anchorOf(sp){
+  const s = sp.shape;
+  if(s.l){ const [x,y] = T(s.l[0], s.l[1]); return {x,y}; }
+  if(s.t==='pt' || s.t==='ell'){ const [x,y] = T(s.c[0], s.c[1]); return {x,y}; }
+  let ax=0, ay=0; s.p.forEach(q=>{ ax+=q[0]; ay+=q[1]; });
+  const [x,y] = T(ax/s.p.length, ay/s.p.length); return {x,y};
+}
+function areaOf(sp){
+  const s = sp.shape;
+  if(s.t==='pt') return 0;
+  if(s.t==='multi') return s.parts.reduce((a,q)=>a+areaOf({shape:{t:'poly',p:q.p}}),0);
+  if(s.t==='ell') return Math.PI*s.rx*s.ry;
+  if(s.t==='line') return 1;
+  let a=0; for(let i=0;i<s.p.length;i++){ const [x0,y0]=s.p[i], [x1,y1]=s.p[(i+1)%s.p.length]; a += x0*y1-x1*y0; }
+  return Math.abs(a/2);
+}
+const AREA_ORDER = SPOTS.filter(sp=>!isPt(sp)).sort((a,b)=>areaOf(b)-areaOf(a));
+
+const ROADS_MAJOR = [
+  [[300,72],[700,84]],
+  [[388,58],[75,452]],
+  [[690,40],[690,480]],
+  [[690,490],[760,557],[860,660],[968,772],[1012,812]],
+  [[10,458],[200,460],[330,458],[440,450],[560,452],[640,466],[683,485]],
+  [[1012,812],[1300,805],[1410,800]],
+  [[652,690],[690,715],[745,800],[800,862],[1000,1052]]
+];
+const ROADS_MINOR = [
+  [[683,485],[655,520],[650,700],[650,845]],
+  [[650,815],[540,808],[440,785],[300,815],[215,825]],
+  [[790,850],[1012,812]],
+  [[1015,818],[1022,1108]],
+  [[1022,1108],[1352,1108]],
+  [[1300,805],[1352,1108]],
+  [[75,455],[70,600],[110,720],[190,800],[215,825]],
+  [[245,268],[515,268]],
+  [[255,268],[255,456]],
+  [[345,270],[345,452]],
+  [[412,270],[412,452]],
+  [[75,555],[345,558]],
+  [[440,615],[648,613]],
+  [[340,458],[352,520],[392,575],[400,650],[408,735],[430,785]]
+];
+const METRO = [[700,40],[702,470],[772,548],[872,650],[976,760],[1020,800],[1410,792]];
+// non-selectable context areas: [kind, points]
+const CTX = [
+  ['z',[[560,333],[600,333],[600,358],[560,358]]],
+  ['z',[[262,363],[343,363],[343,402],[262,402]]],
+  ['z',[[415,322],[505,322],[505,344],[415,344]]],
+  ['z',[[508,300],[558,300],[558,332],[508,332]]],
+  ['z',[[602,333],[652,333],[652,372],[602,372]]],
+  ['z',[[545,399],[600,399],[600,446],[545,446]]],
+  ['z',[[300,590],[394,590],[394,627],[300,627]]],
+  ['z',[[414,642],[470,642],[470,762],[418,762]]],
+  ['z',[[842,722],[888,722],[888,750],[842,750]]],
+  ['z',[[516,186],[665,186],[665,222],[516,222]]],
+  ['z',[[800,698],[870,700],[1000,808],[808,852],[788,800]]],
+  ['z',[[1045,846],[1298,844],[1300,932],[1045,935]]],
+  ['z',[[1028,935],[1338,935],[1345,1102],[1024,1102]]],
+  ['z',[[80,470],[340,470],[340,550],[80,550]]],
+  ['z',[[420,615],[648,615],[648,640],[420,640]]],
+  ['z',[[662,595],[782,595],[792,626],[662,626]]],
+  ['z',[[660,718],[712,718],[700,800],[660,800]]],
+  ['z',[[700,725],[790,725],[790,790],[742,795]]],
+  ['z',[[262,408],[343,408],[343,448],[262,448]]],
+  ['z',[[96,662],[148,662],[180,790],[110,720]]],
+  ['g',[[410,397],[543,397],[543,447],[410,447]]],
+  ['g',[[185,368],[252,368],[252,447],[185,447]]],
+  ['g',[[150,662],[232,662],[232,760],[150,760]]],
+  ['g',[[1050,1030],[1110,1030],[1110,1085],[1050,1085]]],
+  ['w',[[438,142],[478,142],[478,160],[438,160]]],
+  ['w',[[128,594],[200,594],[200,650],[128,650]]]
+];
+// decorations drawn above blocks (no clicks): ponds inside blocks, park trees
+const OVER_WATER = [['p',[[537,105],[562,105],[562,135],[537,135]]],['e',583,263,22,18],['p',[[480,690],[525,690],[525,738],[480,738]]],['e',752,655,14,12],['p',[[835,300],[870,296],[885,390],[845,395]]]];
+const TREES = [[740,180,9],[800,160,11],[920,170,10],[960,250,11],[780,300,9],[930,330,10],[760,400,8],[940,460,11],[900,560,9],[830,520,10],[960,640,9],[740,230,8]];
+const DETAILS = [
+  ['kniAve',678,300,90],['nilkhetRd',230,470,0],['sonargaonRd',255,205,-52],['newElephantRd',560,66,0],
+  ['pubLib',590,206,0],['dmc',770,960,0],['buet',470,840,0],['highcourt',1230,780,0],['metro',830,600,46]
+];
+const LFS = 20;
+
+function fillK(k, P){ return k==='g' ? P.green : k==='w' ? P.water : (P.bld || P.block); }
+function baseFill(sp, P){ return fillK(sp.shape.k, P); }
+
+function mapSVG(sel, plan, kOn, kOff){
+  const P = THEMES[state.theme].map;
+  const font = "'Anek Bangla','Noto Sans Bengali','Nirmala UI','Kohinoor Bangla','Bangla Sangam MN',sans-serif";
+  const exporting = !!plan;
+  const kA = kOn || 1, kB = kOff || kA;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${MAP_W} ${MAP_H}" width="${MAP_W}" height="${MAP_H}" font-family="${font}" role="group" aria-label="${esc(L().mapAria)}">`;
+  s += `<rect width="${MAP_W}" height="${MAP_H}" fill="${P.paper}"/>`;
+  CTX.forEach(([k,p])=>{
+    const fill = k==='g' ? P.green : k==='w' ? P.water : P.block;
+    s += `<path d="${path(p,true)}" fill="${fill}" opacity="${k==='z'?0.5:0.6}"/>`;
+  });
+  ROADS_MINOR.forEach(r=>{ s += `<path d="${path(r)}" fill="none" stroke="${P.edge}" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>`; });
+  ROADS_MAJOR.forEach(r=>{ s += `<path d="${path(r)}" fill="none" stroke="${P.edge}" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>`; });
+  ROADS_MINOR.forEach(r=>{ s += `<path d="${path(r)}" fill="none" stroke="${P.road}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`; });
+  ROADS_MAJOR.forEach(r=>{ s += `<path d="${path(r)}" fill="none" stroke="${P.road}" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>`; });
+  { const [cx,cy] = T(398,505); s += `<ellipse cx="${f1(cx)}" cy="${f1(cy)}" rx="47" ry="41" fill="none" stroke="${P.road}" stroke-width="7"/>`; }
+  s += `<path d="${path(METRO)}" fill="none" stroke="${P.muted}" stroke-width="2" stroke-dasharray="7 5" opacity=".7"/>`;
+
+  s += `<defs><pattern id="womenHatch" patternUnits="userSpaceOnUse" width="9" height="9" patternTransform="rotate(45)"><rect width="9" height="9" fill="${P.bld||P.block}"/><rect width="3.6" height="9" fill="${P.accent}" opacity=".5"/></pattern></defs>`;
+  FIXED.forEach(sp=>{
+    s += `<g class="fixed" data-id="${sp.id}"><title>${esc(fullName(sp))}: ${esc(L().womenTip)}</title><path d="${path(sp.shape.p,true)}" fill="url(#womenHatch)" stroke="${P.accent}" stroke-width="1.4" stroke-opacity=".7" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></g>`;
+  });
+  // selectable area blocks, big first so small ones sit on top
+  AREA_ORDER.forEach(sp=>{
+    const on = sel.has(sp.id), sh = sp.shape;
+    let shape;
+    if(sh.t==='line'){
+      shape = `<path d="${path(sh.p)}" fill="none" stroke="transparent" stroke-width="26" stroke-linecap="round"/>`
+            + `<path class="shp" d="${path(sh.p)}" fill="none" stroke="${on?P.accent:P.road}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`;
+    } else if(sh.t==='multi'){
+      shape = sh.parts.map(q=>`<path class="shp" data-k="${q.k}" d="${path(q.p,true)}" fill="${on?P.accent:fillK(q.k,P)}" stroke="${on?P.accent:P.muted}" stroke-width="1.2" stroke-opacity=".7" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`).join('');
+    } else if(sh.t==='ell'){
+      const [cx,cy] = T(sh.c[0], sh.c[1]);
+      shape = `<ellipse class="shp" cx="${f1(cx)}" cy="${f1(cy)}" rx="${sh.rx}" ry="${sh.ry}" fill="${on?P.accent:baseFill(sp,P)}" stroke="${on?P.accent:P.muted}" stroke-width="1.2" stroke-opacity=".7" vector-effect="non-scaling-stroke"/>`;
+    } else {
+      shape = `<path class="shp" d="${path(sh.p,true)}" fill="${on?P.accent:baseFill(sp,P)}" stroke="${on?P.accent:P.muted}" stroke-width="1.2" stroke-opacity=".7" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    }
+    s += `<g class="pin blk" data-id="${sp.id}" tabindex="0" role="checkbox" aria-checked="${on}" aria-label="${esc(fullName(sp))}"><title>${esc(fullName(sp))}: ${esc(sp[state.lang][1])}</title>${shape}</g>`;
+  });
+
+  // decorations above blocks
+  OVER_WATER.forEach(o=>{
+    if(o[0]==='e'){ const [cx,cy] = T(o[1],o[2]); s += `<ellipse cx="${f1(cx)}" cy="${f1(cy)}" rx="${o[3]}" ry="${o[4]}" fill="${P.water}" pointer-events="none" opacity=".9"/>`; }
+    else s += `<path d="${path(o[1],true)}" fill="${P.water}" pointer-events="none" opacity=".9"/>`;
+  });
+  TREES.forEach(([x,y,r])=>{ const [X,Y] = T(x,y); s += `<circle cx="${f1(X)}" cy="${f1(Y)}" r="${r}" fill="${P.tree}" pointer-events="none" opacity=".85"/>`; });
+
+  DETAILS.forEach(([key,x,y,rot])=>{
+    const [X,Y] = T(x,y);
+    s += `<text class="detail" x="${f1(X)}" y="${f1(Y)}" ${rot?`transform="rotate(${rot} ${f1(X)} ${f1(Y)})"`:''} text-anchor="middle" font-size="12" font-weight="600" fill="${P.muted}" stroke="${P.paper}" stroke-width="3" paint-order="stroke" pointer-events="none" opacity="0">${esc(L()[key])}</text>`;
+  });
+  s += `<g transform="translate(${MAP_W-60},70)" pointer-events="none"><circle r="26" fill="${P.paper}" stroke="${P.muted}" stroke-width="2"/><path d="M0,-18 L8,8 L0,3 L-8,8Z" fill="${P.ink}"/><text y="-34" text-anchor="middle" font-size="18" font-weight="700" fill="${P.ink}" stroke="${P.paper}" stroke-width="4" paint-order="stroke">${esc(L().north)}</text></g>`;
+  s += `<text x="${MAP_W-14}" y="${MAP_H-14}" text-anchor="end" font-size="14" font-weight="500" fill="${P.muted}" stroke="${P.paper}" stroke-width="4" paint-order="stroke" pointer-events="none">${esc(L().note)}</text>`;
+
+  // small landmarks as pins (counter-scaled so they stay tappable)
+  SPOTS.filter(isPt).forEach(sp=>{
+    const on = sel.has(sp.id), p = anchorOf(sp);
+    const kk = on ? kA : kB;
+    s += `<g class="pin" data-id="${sp.id}" transform="translate(${f1(p.x)},${f1(p.y)})" tabindex="0" role="checkbox" aria-checked="${on}" aria-label="${esc(fullName(sp))}">`
+      + `<title>${esc(fullName(sp))}: ${esc(sp[state.lang][1])}</title><g class="pb"${exporting&&kk!==1?` transform="scale(${kk})"`:''}>`
+      + `<circle r="24" fill="transparent"/>`
+      + (exporting ? '' : `<circle class="halo" r="23" fill="${P.accent}" opacity="${on?0.22:0}"/>`)
+      + `<circle class="ring" r="18" fill="none" stroke="${P.ink}" stroke-width="3" opacity="0"/>`
+      + `<circle class="dot" r="11" fill="${on?P.accent:P.pin}" stroke="${on?P.accent:P.ink}" stroke-width="3"/>`
+      + `<path class="tick" d="M-5,0.5 L-1.5,4 L5.5,-4" fill="none" stroke="${P.tick}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" opacity="${on?1:0}"/>`
+      + `</g></g>`;
+  });
+
+  // labels layer
+  s += `<g class="labels" pointer-events="none">`;
+  SPOTS.concat(FIXED).forEach(sp=>{
+    const on = sel.has(sp.id);
+    if(exporting){
+      const q = plan[sp.id]; if(!q) return;
+      s += `<text x="${f1(q.x)}" y="${f1(q.y)}" text-anchor="${q.a}" font-size="${f1(LFS*q.k)}" font-weight="800" fill="${P.ink}" stroke="${P.paper}" stroke-width="${f1(5*q.k)}" stroke-linejoin="round" paint-order="stroke">${esc(mapName(sp))}</text>`;
+    } else {
+      const p = anchorOf(sp);
+      s += `<text class="lbl" data-id="${sp.id}" x="${f1(p.x)}" y="${f1(p.y)}" text-anchor="middle" font-size="${LFS}" font-weight="${on?800:600}" fill="${P.ink}" stroke="${P.paper}" stroke-width="5" stroke-linejoin="round" paint-order="stroke" visibility="hidden">${esc(mapName(sp))}</text>`;
+    }
+  });
+  s += `</g>`;
+  return s + '</svg>';
+}
+
+/* label sizes measured once per render (bold, at base size) */
+let labelM = {};
+function lblEl(id){ return $('mapsvg').querySelector(`.lbl[data-id="${id}"]`); }
+function measureLabels(){
+  const svg = svgEl(); if(!svg) return;
+  labelM = {};
+  svg.querySelectorAll('.lbl').forEach(t=>{
+    const w0 = t.getAttribute('font-weight'), fs0 = t.getAttribute('font-size'), v0 = t.getAttribute('visibility');
+    t.setAttribute('font-weight','800'); t.setAttribute('font-size', LFS);
+    let bb; try{ bb = t.getBBox(); }catch(e){ bb = null; }
+    t.setAttribute('font-weight', w0); t.setAttribute('font-size', fs0);
+    if(v0) t.setAttribute('visibility', v0);
+    labelM[t.dataset.id] = {w:(bb && bb.width) || mapName(spot(t.dataset.id)).length*11, h:(bb && bb.height) || 26};
+  });
+}
+function labelPos(dir, m, k, p){
+  const w = m.w*k, h = m.h*k;
+  if(dir==='c') return {x:p.x, y:p.y+h*0.3, a:'middle', box:{x0:p.x-w/2, x1:p.x+w/2, y0:p.y-h/2, y1:p.y+h/2}};
+  if(dir==='r') return {x:p.x+18*k, y:p.y+h*0.3, a:'start', box:{x0:p.x+16*k, x1:p.x+16*k+w, y0:p.y-h/2, y1:p.y+h/2}};
+  if(dir==='l') return {x:p.x-18*k, y:p.y+h*0.3, a:'end', box:{x0:p.x-16*k-w, x1:p.x-16*k, y0:p.y-h/2, y1:p.y+h/2}};
+  if(dir==='t') return {x:p.x, y:p.y-17*k-h*0.2, a:'middle', box:{x0:p.x-w/2, x1:p.x+w/2, y0:p.y-17*k-h, y1:p.y-17*k}};
+  return {x:p.x, y:p.y+17*k+h*0.8, a:'middle', box:{x0:p.x-w/2, x1:p.x+w/2, y0:p.y+17*k, y1:p.y+17*k+h}};
+}
+const overlap = (a,b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+function planLabels(k, onlySel, kOff){
+  const pinR = sp => 14*((onlySel && !state.sel.has(sp.id)) ? (kOff||k) : k);
+  const pins = SPOTS.filter(isPt).map(sp=>{ const p = anchorOf(sp), r = pinR(sp); return {id:sp.id, x0:p.x-r, x1:p.x+r, y0:p.y-r, y1:p.y+r}; });
+  const order = SPOTS.concat(FIXED).filter(sp=>!onlySel || state.sel.has(sp.id))
+    .sort((a,b)=>((state.sel.has(b.id)?100:0)+b.pr) - ((state.sel.has(a.id)?100:0)+a.pr));
+  const placed = [], plan = {};
+  SPOTS.concat(FIXED).forEach(sp=>{ plan[sp.id] = null; });
+  order.forEach(sp=>{
+    const m = labelM[sp.id]; if(!m) return;
+    const p = anchorOf(sp);
+    const dirs = isPt(sp) ? [sp.d||'r', ...['r','l','b','t'].filter(d=>d!==(sp.d||'r'))] : ['c','b','t'];
+    for(const d of dirs){
+      const q = labelPos(d, m, k, p), bx = q.box;
+      if(bx.x0 < 2 || bx.y0 < 2 || bx.x1 > MAP_W-2 || bx.y1 > MAP_H-2) continue;
+      if(placed.some(o=>overlap(o,bx))) continue;
+      if(pins.some(o=>o.id!==sp.id && overlap(o,bx))) continue;
+      plan[sp.id] = {x:q.x, y:q.y, a:q.a, k}; placed.push(bx); break;
+    }
+    if(!plan[sp.id] && sp.force){
+      const q = labelPos(dirs[0], m, k, p);
+      plan[sp.id] = {x:q.x, y:q.y, a:q.a, k}; placed.push(q.box);
+    }
+  });
+  return plan;
+}
+function layoutLabels(k){
+  const svg = svgEl(); if(!svg) return;
+  const plan = planLabels(k);
+  svg.querySelectorAll('.lbl').forEach(t=>{
+    const sp = spot(t.dataset.id), q = plan[sp.id];
+    const fb = q || (()=>{ const m = labelM[sp.id] || {w:60,h:26}; const r = labelPos(isPt(sp)?(sp.d||'r'):'c', m, k, anchorOf(sp)); return {x:r.x, y:r.y, a:r.a}; })();
+    t.setAttribute('x', f1(fb.x)); t.setAttribute('y', f1(fb.y)); t.setAttribute('text-anchor', fb.a);
+    t.setAttribute('font-size', f1(LFS*k)); t.setAttribute('stroke-width', f1(5*k));
+    if(q){ t.removeAttribute('visibility'); delete t.dataset.peek; } else t.setAttribute('visibility','hidden');
+  });
+}
+// show a hidden label while hovering its block
+$('mapsvg').addEventListener('pointerover', e=>{
+  const g = e.target.closest && e.target.closest('.pin'); if(!g) return;
+  const t = lblEl(g.dataset.id);
+  if(t && t.getAttribute('visibility')==='hidden'){ t.dataset.peek = '1'; t.removeAttribute('visibility'); }
+});
+$('mapsvg').addEventListener('pointerout', e=>{
+  const g = e.target.closest && e.target.closest('.pin'); if(!g) return;
+  if(e.relatedTarget && g.contains(e.relatedTarget)) return;
+  const t = lblEl(g.dataset.id);
+  if(t && t.dataset.peek){ t.setAttribute('visibility','hidden'); delete t.dataset.peek; }
+});
+
+function renderMap(){
+  $('mapsvg').innerHTML = mapSVG(state.sel);
+  $('mapbox').style.background = THEMES[state.theme].map.paper;
+  measureLabels();
+  applyView(true);
+}
+
+function paintPin(id, animate){
+  const g = $('mapsvg').querySelector(`.pin[data-id="${id}"]`);
+  if(!g) return;
+  const sp = spot(id), P = THEMES[state.theme].map, on = state.sel.has(id);
+  g.setAttribute('aria-checked', on);
+  if(isPt(sp)){
+    g.querySelector('.halo').setAttribute('opacity', on?0.22:0);
+    const dot = g.querySelector('.dot');
+    dot.setAttribute('fill', on?P.accent:P.pin);
+    dot.setAttribute('stroke', on?P.accent:P.ink);
+    g.querySelector('.tick').setAttribute('opacity', on?1:0);
+    if(animate && on){ g.classList.remove('pop'); void g.getBBox(); g.classList.add('pop'); }
+  } else {
+    g.querySelectorAll('.shp').forEach(shp=>{
+      if(sp.shape.t==='line') shp.setAttribute('stroke', on?P.accent:P.road);
+      else { shp.setAttribute('fill', on?P.accent:fillK(shp.dataset.k || sp.shape.k, P)); shp.setAttribute('stroke', on?P.accent:P.muted); }
+    });
+    if(animate && on){ g.classList.remove('flash'); void g.getBBox(); g.classList.add('flash'); }
+  }
+  const t = lblEl(id); if(t) t.setAttribute('font-weight', on?800:600);
+}
+
+/* ---------- zoom & pan ---------- */
+const FULL = {x:0, y:0, w:MAP_W, h:MAP_H};
+const MIN_W = MAP_W/7;
+let view = {...FULL};
+const gesture = {ptrs:new Map(), drag:null, pinch:null, moved:false};
+const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const svgEl = () => $('mapsvg').querySelector('svg');
+const isZoomed = () => view.w < MAP_W - 0.5;
+
+function clampView(v){
+  const w = Math.min(MAP_W, Math.max(MIN_W, v.w));
+  const h = w*MAP_H/MAP_W;
+  return {w, h, x:Math.min(Math.max(v.x,0), MAP_W-w), y:Math.min(Math.max(v.y,0), MAP_H-h)};
+}
+let lastK = -1;
+function labelScale(){
+  const r = $('mapsvg').getBoundingClientRect();
+  const sc = r.width ? r.width/view.w : 0.7;
+  const z = MAP_W/view.w;
+  const f = Math.min(18, Math.max(11.5, 12*Math.pow(z, 0.3)));   // on-screen label size in px
+  return f/(LFS*sc);
+}
+function applyView(force){
+  const svg = svgEl();
+  if(svg){
+    svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`);
+    const k = labelScale();
+    if(force===true || Math.abs(k-lastK) > 0.004){
+      lastK = k;
+      const tf = `scale(${k.toFixed(4)})`;
+      svg.querySelectorAll('.pb').forEach(g=>g.setAttribute('transform', tf));
+      svg.querySelectorAll('.detail').forEach(t=>t.setAttribute('font-size', (13*k).toFixed(2)));
+      layoutLabels(k);
+    }
+  }
+  const box = $('mapbox');
+  box.classList.toggle('zoomed', isZoomed());
+  box.classList.toggle('deep', view.w <= MAP_W/1.6);
+  $('zIn').disabled = view.w <= MIN_W + 0.5;
+  $('zOut').disabled = !isZoomed();
+  $('zReset').disabled = !isZoomed();
+}
+window.addEventListener('resize', ()=>applyView(true));
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(()=>{ measureLabels(); applyView(true); });
+}
+let anim = 0;
+function animateTo(target){
+  cancelAnimationFrame(anim);
+  if(reduceMotion){ view = target; applyView(); return; }
+  const from = {...view}, t0 = performance.now(), dur = 220;
+  const step = now=>{
+    const k = Math.min(1, (now-t0)/dur), e = 1 - Math.pow(1-k, 3);
+    view = clampView({x:from.x+(target.x-from.x)*e, y:from.y+(target.y-from.y)*e, w:from.w+(target.w-from.w)*e});
+    applyView();
+    if(k<1) anim = requestAnimationFrame(step);
+  };
+  anim = requestAnimationFrame(step);
+}
+function zoomAt(factor, cx, cy, animate){
+  const nw = Math.min(MAP_W, Math.max(MIN_W, view.w/factor));
+  const r = nw/view.w;
+  const target = clampView({x:cx-(cx-view.x)*r, y:cy-(cy-view.y)*r, w:nw});
+  if(animate) animateTo(target); else { cancelAnimationFrame(anim); view = target; applyView(); }
+}
+function toSvg(clientX, clientY){
+  const r = svgEl().getBoundingClientRect();
+  return {x:view.x + (clientX-r.left)/r.width*view.w, y:view.y + (clientY-r.top)/r.height*view.h};
+}
+const center = () => ({x:view.x+view.w/2, y:view.y+view.h/2});
+
+$('zIn').addEventListener('click', ()=>{ const c = center(); zoomAt(1.6, c.x, c.y, true); });
+$('zOut').addEventListener('click', ()=>{ const c = center(); zoomAt(1/1.6, c.x, c.y, true); });
+$('zReset').addEventListener('click', ()=>animateTo({...FULL}));
+
+const isMac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+let hintTimer;
+function showHint(){
+  const h = $('zhint');
+  h.textContent = L().wheelHint(isMac ? '⌘' : 'Ctrl');
+  h.classList.add('show');
+  clearTimeout(hintTimer); hintTimer = setTimeout(()=>h.classList.remove('show'), 1400);
+}
+$('mapbox').addEventListener('wheel', e=>{
+  if(e.ctrlKey || e.metaKey){
+    e.preventDefault();
+    const p = toSvg(e.clientX, e.clientY);
+    zoomAt(Math.exp(-e.deltaY*0.0035), p.x, p.y, false);
+  } else if(Math.abs(e.deltaY) > 4){ showHint(); }
+}, {passive:false});
+
+$('mapbox').addEventListener('keydown', e=>{
+  if(e.key==='+' || e.key==='='){ e.preventDefault(); $('zIn').click(); }
+  else if(e.key==='-' || e.key==='_'){ e.preventDefault(); $('zOut').click(); }
+  else if(e.key==='0'){ e.preventDefault(); $('zReset').click(); }
+});
+
+const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+$('mapsvg').addEventListener('pointerdown', e=>{
+  if(e.pointerType==='mouse' && e.button!==0) return;
+  const G = gesture;
+  G.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if(G.ptrs.size===1){
+    G.moved = false;
+    G.drag = {sx:e.clientX, sy:e.clientY, vx:view.x, vy:view.y};
+  } else if(G.ptrs.size===2){
+    const [a,b] = [...G.ptrs.values()];
+    G.pinch = {d:Math.max(dist(a,b),1), w:view.w, mid:toSvg((a.x+b.x)/2,(a.y+b.y)/2)};
+    G.drag = null; G.moved = true;
+    try{ $('mapsvg').setPointerCapture(e.pointerId); }catch(err){}
+  }
+});
+window.addEventListener('pointermove', e=>{
+  const G = gesture;
+  if(!G.ptrs.has(e.pointerId)) return;
+  G.ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if(G.pinch && G.ptrs.size>=2){
+    e.preventDefault();
+    const [a,b] = [...G.ptrs.values()];
+    const nw = Math.min(MAP_W, Math.max(MIN_W, G.pinch.w*G.pinch.d/Math.max(dist(a,b),1)));
+    const r = svgEl().getBoundingClientRect();
+    const fx = ((a.x+b.x)/2 - r.left)/r.width, fy = ((a.y+b.y)/2 - r.top)/r.height;
+    cancelAnimationFrame(anim);
+    view = clampView({x:G.pinch.mid.x - fx*nw, y:G.pinch.mid.y - fy*nw*MAP_H/MAP_W, w:nw});
+    applyView();
+  } else if(G.drag && isZoomed()){
+    const dx = e.clientX-G.drag.sx, dy = e.clientY-G.drag.sy;
+    if(!G.moved && Math.hypot(dx,dy) > 6){
+      G.moved = true;
+      $('mapbox').classList.add('dragging');
+      try{ $('mapsvg').setPointerCapture(e.pointerId); }catch(err){}
+    }
+    if(G.moved){
+      const r = svgEl().getBoundingClientRect();
+      cancelAnimationFrame(anim);
+      view = clampView({x:G.drag.vx - dx/r.width*view.w, y:G.drag.vy - dy/r.height*view.h, w:view.w});
+      applyView();
+    }
+  }
+}, {passive:false});
+function endPointer(e){
+  const G = gesture;
+  if(!G.ptrs.has(e.pointerId)) return;
+  G.ptrs.delete(e.pointerId);
+  if(G.ptrs.size < 2) G.pinch = null;
+  if(G.ptrs.size === 1){
+    const p = [...G.ptrs.values()][0];
+    G.drag = {sx:p.x, sy:p.y, vx:view.x, vy:view.y};
+  } else if(G.ptrs.size === 0){
+    G.drag = null;
+    $('mapbox').classList.remove('dragging');
+  }
+}
+window.addEventListener('pointerup', endPointer);
+window.addEventListener('pointercancel', endPointer);
+
+/* ---------- list & themes ---------- */
+function renderList(){
+  const list = $('list');
+  list.innerHTML = '';
+  GROUPS.forEach(gk=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'grp';
+    const h = document.createElement('h3');
+    h.textContent = L().groups[gk];
+    wrap.appendChild(h);
+    SPOTS.filter(s=>s.g===gk).forEach(sp=>{
+      const lab = document.createElement('label');
+      lab.className = 'item';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.dataset.id = sp.id; cb.checked = state.sel.has(sp.id);
+      cb.addEventListener('change', ()=>toggle(sp.id, cb.checked));
+      const txt = document.createElement('div');
+      const b = document.createElement('b'); b.textContent = fullName(sp);
+      txt.append(b);
+      lab.append(cb, txt);
+      wrap.appendChild(lab);
+    });
+    list.appendChild(wrap);
+  });
+}
+
+function renderThemes(){
+  const box = $('themes');
+  box.innerHTML = '';
+  Object.entries(THEMES).forEach(([k,t])=>{
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'sw';
+    b.setAttribute('aria-pressed', k===state.theme);
+    const i = document.createElement('i');
+    i.style.background = `linear-gradient(135deg, ${t.map.paper} 0 50%, ${t.map.accent} 50% 100%)`;
+    const sp = document.createElement('span'); sp.textContent = t[state.lang];
+    b.append(i, sp);
+    b.addEventListener('click', ()=>{
+      state.theme = k; save();
+      box.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed', x===b));
+      renderMap();
+    });
+    box.appendChild(b);
+  });
+}
+
+/* ---------- verdict ---------- */
+function rankIndex(n){
+  if(n<=0) return 0;
+  if(n>=TOTAL) return 6;
+  const f = n/TOTAL;
+  return f<=0.15 ? 1 : f<=0.33 ? 2 : f<=0.52 ? 3 : f<=0.74 ? 4 : 5;
+}
+function variant(){
+  let h = 0;
+  SPOTS.forEach((s,i)=>{ if(state.sel.has(s.id)) h += (i+1)*7; });
+  return h;
+}
+function complimentText(){
+  const r = RANKS[rankIndex(state.sel.size)][state.lang];
+  const fits = r.c.filter(f=>!f.when || f.when(state.sel));
+  const pool = fits.length ? fits : r.c.filter(f=>!f.when);
+  return pool[variant() % pool.length](cleanName());
+}
+function earnedBadges(){ return BADGES.filter(b=>b.when(state.sel)); }
+
+let lastRank = null;
+function update(){
+  const n = state.sel.size, p = pct(n), Ls = L();
+  const ri = rankIndex(n), rank = RANKS[ri][state.lang];
+  $('count').textContent = `${fmt(n)} / ${fmt(TOTAL)}`;
+  $('who').textContent = Ls.report(cleanName());
+  $('score').textContent = Ls.score(fmt(n), fmt(TOTAL), fmt(p));
+  $('meter').style.width = p + '%';
+  $('compliment').textContent = complimentText();
+  $('stampPct').textContent = fmt(p) + '%';
+  $('stampTitle').textContent = rank.t;
+  $('dockCount').textContent = `${fmt(n)}/${fmt(TOTAL)}`;
+  $('dockTitle').textContent = rank.t;
+
+  const bl = $('badges');
+  bl.innerHTML = '';
+  earnedBadges().forEach(b=>{
+    const li = document.createElement('li');
+    const e = document.createElement('span'); e.className='e'; e.textContent=b.e; e.setAttribute('aria-hidden','true');
+    const d = document.createElement('div');
+    const t = document.createElement('b'); t.textContent = b[state.lang][0];
+    const sm = document.createElement('small'); sm.textContent = b[state.lang][1];
+    d.append(t, sm); li.append(e, d); bl.appendChild(li);
+  });
+  bl.hidden = !bl.children.length;
+
+  const todo = PRIORITY.filter(id=>!state.sel.has(id)).slice(0,3).map(id=>fullName(spot(id)));
+  $('next').textContent = todo.length ? Ls.next(joinList(todo)) : Ls.nextDone;
+
+  if(lastRank!==null && lastRank!==ri){
+    const st = $('stamp');
+    st.classList.remove('hit'); void st.offsetWidth; st.classList.add('hit');
+  }
+  lastRank = ri;
+}
+
+/* ---------- interactions ---------- */
+function setCaption(id, on){
+  const c = $('caption');
+  c.textContent = '';
+  if(!id){ c.textContent = L().capIdle; return; }
+  const sp = spot(id);
+  const b = document.createElement('b');
+  b.textContent = fullName(sp) + ' ';
+  c.appendChild(b);
+  c.appendChild(document.createTextNode(on ? `${L().capOn} ${sp[state.lang][1]}` : L().capOff));
+}
+
+function toggle(id, force){
+  const on = force===undefined ? !state.sel.has(id) : !!force;
+  if(on) state.sel.add(id); else state.sel.delete(id);
+  save();
+  paintPin(id, true);
+  const cb = $('list').querySelector(`input[data-id="${id}"]`);
+  if(cb) cb.checked = on;
+  setCaption(id, on);
+  update();
+  layoutLabels(lastK > 0 ? lastK : 1);
+}
+
+$('mapbox').addEventListener('click', e=>{
+  if(gesture.moved){ gesture.moved = false; return; }
+  const g = e.target.closest('.pin');
+  if(g) toggle(g.dataset.id);
+});
+$('mapbox').addEventListener('keydown', e=>{
+  const g = e.target.closest && e.target.closest('.pin');
+  if(g && (e.key==='Enter' || e.key===' ')){ e.preventDefault(); toggle(g.dataset.id); }
+});
+
+$('allBtn').addEventListener('click', ()=>{
+  SPOTS.forEach(s=>state.sel.add(s.id)); save();
+  SPOTS.forEach(s=>paintPin(s.id,false));
+  $('list').querySelectorAll('input').forEach(cb=>cb.checked=true);
+  setCaption(null); update(); applyView(true);
+});
+$('noneBtn').addEventListener('click', ()=>{
+  state.sel.clear(); save();
+  SPOTS.forEach(s=>paintPin(s.id,false));
+  $('list').querySelectorAll('input').forEach(cb=>cb.checked=false);
+  setCaption(null); update(); applyView(true);
+});
+
+$('name').addEventListener('input', e=>{ state.name = e.target.value.slice(0,40); save(); update(); });
+
+$('langBtn').addEventListener('click', ()=>{ state.lang = state.lang==='bn'?'en':'bn'; save(); renderAll(); });
+
+$('dockBtn').addEventListener('click', ()=>{ $('verdict').scrollIntoView({block:'start'}); });
+
+if('IntersectionObserver' in window){
+  new IntersectionObserver(entries=>{
+    entries.forEach(en=>$('dock').classList.toggle('away', en.isIntersecting));
+  }, {threshold:0.15}).observe($('verdict'));
+}
+
+let toastTimer;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------- copy ---------- */
+function shareText(){
+  const n = state.sel.size, Ls = L();
+  const lines = [
+    Ls.brand,
+    Ls.report(cleanName()),
+    Ls.score(fmt(n), fmt(TOTAL), fmt(pct(n))),
+    `${RANKS[rankIndex(n)][state.lang].t}: “${complimentText()}”`
+  ];
+  const b = earnedBadges();
+  if(b.length) lines.push(b.map(x=>`${x.e} ${x[state.lang][0]}`).join('  '));
+  return lines.join('\n');
+}
+$('copyBtn').addEventListener('click', async ()=>{
+  const text = shareText();
+  let ok = false;
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); ok = true; } }catch(e){}
+  if(!ok){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
+    }catch(e){ ok = false; }
+  }
+  toast(ok ? L().copied : L().copyFail);
+});
+
+/* ---------- image export ---------- */
+let downloads = null, dlPromise = Promise.resolve(null);
+try{
+  if(window.claude && typeof window.claude.use==='function'){
+    dlPromise = window.claude.use('downloads').then(d=>{ downloads = d; return d; }).catch(()=>null);
+  }
+}catch(e){}
+const withTimeout = (pr, ms) => Promise.race([pr, new Promise(r=>setTimeout(()=>r(null), ms))]);
+function syncDlBtn(){
+  $('dlBtn').hidden = !currentBlob;
+  $('shareBtn').hidden = !canShareFile();
+  $('ovHint').textContent = L().pvHintSave;
+}
+
+function loadImg(src){
+  return new Promise((res,rej)=>{ const im = new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=src; });
+}
+function wrapLines(ctx, text, maxW){
+  const words = text.split(/\s+/); const lines = []; let line = '';
+  words.forEach(w=>{
+    const test = line ? line + ' ' + w : w;
+    if(ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; }
+    else line = test;
+  });
+  if(line) lines.push(line);
+  return lines;
+}
+
+let currentBlob = null, currentUrl = null;
+async function buildImage(){
+  const P = THEMES[state.theme].map, Ls = L();
+  const n = state.sel.size, p = pct(n);
+  const fam = '"Anek Bangla","Noto Sans Bengali","Nirmala UI",sans-serif';
+  const head = Ls.imgHead(cleanName(), fmt(p));
+  const sub = Ls.imgSub(fmt(n), fmt(TOTAL));
+  const rankT = RANKS[rankIndex(n)][state.lang].t;
+  const comp = complimentText();
+  try{
+    await Promise.all([
+      document.fonts.load(`800 64px "Anek Bangla"`, head + rankT),
+      document.fonts.load(`500 36px "Anek Bangla"`, sub + comp + Ls.brand)
+    ]);
+  }catch(e){}
+
+  const W = 1080, PAD = 72, maxW = W - PAD*2;
+  const c = document.createElement('canvas');
+  let ctx = c.getContext('2d');
+  ctx.font = `800 64px ${fam}`; const headLines = wrapLines(ctx, head, maxW);
+  ctx.font = `600 38px ${fam}`; let compLines = wrapLines(ctx, `“${comp}”`, maxW);
+  if(compLines.length > 4) compLines = compLines.slice(0,4);
+  const mapW = W - 80, mapH = mapW*MAP_H/MAP_W;
+  const H = PAD + 40 + headLines.length*76 + 56 + 24 + mapH + 40 + 56 + compLines.length*52 + 40 + 50 + PAD;
+  c.width = W; c.height = Math.ceil(H);
+  ctx = c.getContext('2d');
+  ctx.fillStyle = P.paper; ctx.fillRect(0,0,W,c.height);
+  ctx.textBaseline = 'alphabetic';
+
+  let y = PAD + 30;
+  ctx.fillStyle = P.accent; ctx.font = `700 30px ${fam}`; ctx.fillText(Ls.brand, PAD, y);
+  y += 22;
+  ctx.fillStyle = P.ink; ctx.font = `800 64px ${fam}`;
+  headLines.forEach(l=>{ y += 76; ctx.fillText(l, PAD, y); });
+  y += 50;
+  ctx.fillStyle = P.muted; ctx.font = `500 34px ${fam}`; ctx.fillText(sub, PAD, y);
+  y += 30;
+
+  const img = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(mapSVG(state.sel, planLabels(1.45, true, 0.6), 1.45, 0.6)));
+  const mx = (W - mapW)/2;
+  ctx.save();
+  ctx.beginPath();
+  if(ctx.roundRect) ctx.roundRect(mx, y, mapW, mapH, 28); else ctx.rect(mx, y, mapW, mapH);
+  ctx.clip();
+  ctx.drawImage(img, mx, y, mapW, mapH);
+  ctx.restore();
+  ctx.strokeStyle = P.edge; ctx.lineWidth = 2;
+  ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(mx, y, mapW, mapH, 28); else ctx.rect(mx, y, mapW, mapH); ctx.stroke();
+  y += mapH + 40;
+
+  ctx.fillStyle = P.accent; ctx.font = `800 46px ${fam}`; y += 46; ctx.fillText(rankT, PAD, y);
+  y += 10;
+  ctx.fillStyle = P.ink; ctx.font = `600 38px ${fam}`;
+  compLines.forEach(l=>{ y += 52; ctx.fillText(l, PAD, y); });
+  y += 70;
+  ctx.font = `600 30px ${fam}`; ctx.fillStyle = P.muted;
+  ctx.font = `600 28px ${fam}`; ctx.textAlign = 'right'; ctx.fillStyle = P.muted;
+  ctx.fillText(Ls.brand, W - PAD, y);
+
+  const blob = await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('blob')), 'image/png'));
+  return {blob, dataUrl: c.toDataURL('image/png')};
+}
+
+$('imgBtn').addEventListener('click', async ()=>{
+  const btn = $('imgBtn');
+  btn.disabled = true; btn.textContent = L().making;
+  try{
+    const out = await buildImage();
+    currentBlob = out.blob;
+    if(currentUrl) URL.revokeObjectURL(currentUrl);
+    currentUrl = URL.createObjectURL(currentBlob);
+    $('ovImg').src = out.dataUrl;
+    $('ovImg').alt = L().imgHead(cleanName(), fmt(pct(state.sel.size)));
+    syncDlBtn();
+    $('ov').classList.add('open');
+    $('ovClose').focus();
+  }catch(e){
+    toast(L().imgFail);
+  }finally{
+    btn.disabled = false; btn.textContent = L().makeImg;
+  }
+});
+function closeOv(){ $('ov').classList.remove('open'); $('imgBtn').focus(); }
+$('ovClose').addEventListener('click', closeOv);
+$('ov').addEventListener('click', e=>{ if(e.target===$('ov')) closeOv(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape' && $('ov').classList.contains('open')) closeOv(); });
+function plainDownload(fname){
+  const a = document.createElement('a');
+  a.href = currentUrl; a.download = fname; a.rel = 'noopener'; a.style.display = 'none';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>a.remove(), 1000);
+}
+$('dlBtn').addEventListener('click', async ()=>{
+  if(!currentBlob) return;
+  const fname = 'ghure-dekho-dhabi.png';
+  const dl = downloads || await withTimeout(dlPromise, 2500);
+  if(dl){
+    try{ await dl.save({filename:fname, data:currentBlob}); toast(L().saved); return; }
+    catch(err){
+      const code = err && err.code;
+      if(code==='declined'){ toast(L().declined); return; }
+      if(code==='rate_limited') return;
+      downloads = null;
+    }
+  }
+  try{ plainDownload(fname); }catch(e){}
+  toast(L().dlStarted);
+});
+function shareFile(){ return new File([currentBlob], 'ghure-dekho-dhabi.png', {type:'image/png'}); }
+function canShareFile(){
+  try{ return !!(currentBlob && navigator.canShare && navigator.canShare({files:[shareFile()]})); }catch(e){ return false; }
+}
+$('shareBtn').addEventListener('click', async ()=>{
+  if(!currentBlob) return;
+  try{ await navigator.share({files:[shareFile()], title:L().brand}); }
+  catch(err){ if(!(err && err.name==='AbortError')) toast(L().shareFail); }
+});
+
+/* ---------- render all ---------- */
+function renderAll(){
+  const Ls = L();
+  document.documentElement.lang = state.lang;
+  document.title = Ls.docTitle;
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const v = Ls[el.dataset.t];
+    if(typeof v==='string') el.textContent = v;
+  });
+  $('langBtn').textContent = Ls.lang;
+  $('langBtn').setAttribute('lang', state.lang==='bn'?'en':'bn');
+  $('name').placeholder = Ls.namePh;
+  [['zIn','zIn'],['zOut','zOut'],['zReset','zReset']].forEach(([id,k])=>{ $(id).setAttribute('aria-label', Ls[k]); $(id).title = Ls[k]; });
+  $('zoomBar').setAttribute('aria-label', Ls.zoomBar);
+  $('name').value = state.name;
+  renderThemes();
+  renderList();
+  renderMap();
+  setCaption(null);
+  lastRank = null;
+  update();
+  syncDlBtn();
+}
+renderAll();
+})();
+</script>
+</body>
+</html>
