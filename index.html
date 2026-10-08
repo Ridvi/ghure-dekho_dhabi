@@ -508,11 +508,11 @@ const STR = {
     makeImg:'ছবি বানান', copy:'লেখা কপি করুন', copied:'লেখা কপি হয়েছে',
     copyFail:'কপি করা যায়নি। লেখাটি হাতে সিলেক্ট করে কপি করুন।',
     pvTitle:'আপনার ক্যাম্পাস ম্যাপ', download:'PNG ডাউনলোড করুন', close:'বন্ধ করুন',
-    pvHintSave:'ছবিটি ফোনে রাখতে ডাউনলোড করুন, বা সরাসরি শেয়ার করুন।', dlStarted:'ডাউনলোড শুরু হচ্ছে। শুরু না হলে ছবিটিতে চেপে ধরে সেভ করুন।', share:'শেয়ার করুন', shareFail:'শেয়ার করা যায়নি।',
+    pvHintSave:'ছবিটি ফোনে রাখতে ডাউনলোড করুন, বা সরাসরি শেয়ার করুন।', pvHintDl:'ছবিটি ফোনে রাখতে ডাউনলোড করুন।', dlStarted:'ডাউনলোড শুরু হচ্ছে। শুরু না হলে ছবিটিতে চেপে ধরে সেভ করুন।', share:'শেয়ার করুন', shareFail:'শেয়ার করা যায়নি।',
     pvHint:'ছবিটিতে চেপে ধরে বা রাইট-ক্লিক করে সেভ করুন।',
     making:'ছবি তৈরি হচ্ছে…', saved:'ছবি ডাউনলোড হয়েছে', declined:'ডাউনলোড বাতিল হয়েছে',
     imgFail:'ছবি বানানো যায়নি। আবার চেষ্টা করুন।',
-    dockBtn:'মন্তব্য দেখুন', womenNote:'দাগানো ব্লকগুলো ছাত্রী হল: সবসময় চিহ্নিত থাকে, বাছাই করা যায় না, পয়েন্টেও গোনা হয় না।', womenTip:'সবসময় চিহ্নিত, পয়েন্টে গোনা হয় না', maker:'Mahir Alvi Ridvi',
+    dockBtn:'মন্তব্য দেখুন', preparing:'ছবি তৈরি হচ্ছে…', dlStarted2:'ডাউনলোড শুরু হচ্ছে…', iosSaveHint:'ছবি খুলেছে; চেপে ধরে “Save to Photos” বেছে নিন।', dlFallback2:'ডাউনলোড করা গেল না। ছবিটিতে চেপে ধরে সেভ করুন।', womenNote:'দাগানো ব্লকগুলো ছাত্রী হল: সবসময় চিহ্নিত থাকে, বাছাই করা যায় না, পয়েন্টেও গোনা হয় না।', womenTip:'সবসময় চিহ্নিত, পয়েন্টে গোনা হয় না', maker:'Mahir Alvi Ridvi',
     foot:'ঘুরে দেখো ঢাবি একটি মজার, অনানুষ্ঠানিক প্রজেক্ট; ঢাকা বিশ্ববিদ্যালয়ের সাথে এর কোনো আনুষ্ঠানিক সম্পর্ক নেই। ম্যাপটি OpenStreetMap-ভিত্তিক মানচিত্র অনুসরণ করে আঁকা (© OpenStreetMap contributors); কাছাকাছি জায়গার নাম দেখতে জুম করুন। ভাবনাটি Unseen Bangladesh থেকে অনুপ্রাণিত।',
     note:'ম্যাপ ডেটা © OpenStreetMap contributors', north:'উ',
     imgHead:(n,p)=>n?`${n} ঢাবির ${p}% ঘুরে দেখেছেন`:`ঢাবির ${p}% ঘুরে দেখেছি`,
@@ -537,11 +537,11 @@ const STR = {
     makeImg:'Make image', copy:'Copy text', copied:'Text copied',
     copyFail:"Couldn't copy. Select the text and copy it manually.",
     pvTitle:'Your campus map', download:'Download PNG', close:'Close',
-    pvHintSave:'Download the image to keep it, or share it directly.', dlStarted:"Downloading. If nothing happens, long-press the image to save it.", share:'Share', shareFail:"Couldn't share.",
+    pvHintSave:'Download the image to keep it, or share it directly.', pvHintDl:'Download the image to keep it on your phone.', dlStarted:"Downloading. If nothing happens, long-press the image to save it.", share:'Share', shareFail:"Couldn't share.",
     pvHint:'Long-press or right-click the image to save it.',
     making:'Making image…', saved:'Image downloaded', declined:'Download cancelled',
     imgFail:"Couldn't make the image. Try again.",
-    dockBtn:'See verdict', womenNote:"Striped blocks are women's halls: always marked, not selectable and not counted in your score.", womenTip:'always marked, not counted', maker:'Mahir Alvi Ridvi',
+    dockBtn:'See verdict', preparing:'Preparing image…', dlStarted2:'Starting download…', iosSaveHint:"Image opened; long-press it and choose 'Save to Photos'.", dlFallback2:"Couldn't download. Long-press the image to save it.", womenNote:"Striped blocks are women's halls: always marked, not selectable and not counted in your score.", womenTip:'always marked, not counted', maker:'Mahir Alvi Ridvi',
     foot:'Ghure Dekho DU is a just-for-fun, unofficial project with no official link to the University of Dhaka. The map is traced from an OpenStreetMap-based map (© OpenStreetMap contributors); zoom in to see the names of places that sit close together. Inspired by Unseen Bangladesh.',
     note:'Map data © OpenStreetMap contributors', north:'N',
     imgHead:(n,p)=>n?`${n} has seen ${p}% of DU`:`I've seen ${p}% of DU`,
@@ -562,7 +562,34 @@ try{
     if(typeof o.name==='string') state.name = o.name.slice(0,40);
   }
 }catch(e){}
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify({sel:[...state.sel],theme:state.theme,lang:state.lang,name:state.name})); }catch(e){} }
+// In-app browsers (Facebook, Messenger, Instagram...) block file downloads.
+const UA = navigator.userAgent || '';
+const IN_APP = /FBAN|FBAV|FB_IAB|FBIOS|FB4A|Instagram|Messenger|MicroMessenger|Line\//i.test(UA);
+const IS_ANDROID = /Android/i.test(UA);
+// selections can travel in the link, so "open in browser" keeps them
+try{
+  const q = new URLSearchParams(location.search);
+  if(q.has('s')){
+    state.sel = new Set(q.get('s').split('.').filter(id=>SPOTS.some(x=>x.id===id)));
+    if(q.get('t') && THEMES[q.get('t')]) state.theme = q.get('t');
+    if(q.get('l')==='en' || q.get('l')==='bn') state.lang = q.get('l');
+    state.name = (q.get('n') || '').slice(0,40);
+    if(!IN_APP) history.replaceState(null, '', location.pathname);
+  }
+}catch(e){}
+function stateUrl(){
+  const u = new URL(location.href);
+  u.hash = ''; u.search = '';
+  u.searchParams.set('s', [...state.sel].join('.'));
+  u.searchParams.set('t', state.theme);
+  u.searchParams.set('l', state.lang);
+  if(state.name.trim()) u.searchParams.set('n', state.name.trim());
+  return u.toString();
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({sel:[...state.sel],theme:state.theme,lang:state.lang,name:state.name})); }catch(e){}
+  if(IN_APP){ try{ history.replaceState(null, '', stateUrl()); }catch(e){} }
+}
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
@@ -1195,8 +1222,7 @@ function shareText(){
   if(b.length) lines.push(b.map(x=>`${x.e} ${x[state.lang][0]}`).join('  '));
   return lines.join('\n');
 }
-$('copyBtn').addEventListener('click', async ()=>{
-  const text = shareText();
+async function copyText(text){
   let ok = false;
   try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(text); ok = true; } }catch(e){}
   if(!ok){
@@ -1206,7 +1232,10 @@ $('copyBtn').addEventListener('click', async ()=>{
       document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
     }catch(e){ ok = false; }
   }
-  toast(ok ? L().copied : L().copyFail);
+  return ok;
+}
+$('copyBtn').addEventListener('click', async ()=>{
+  toast((await copyText(shareText())) ? L().copied : L().copyFail);
 });
 
 /* ---------- image export ---------- */
@@ -1219,8 +1248,8 @@ try{
 const withTimeout = (pr, ms) => Promise.race([pr, new Promise(r=>setTimeout(()=>r(null), ms))]);
 function syncDlBtn(){
   $('dlBtn').hidden = !currentBlob;
-  $('shareBtn').hidden = !canShareFile();
-  $('ovHint').textContent = L().pvHintSave;
+  $('shareBtn').hidden = IN_APP || !canShareFile();
+  $('ovHint').textContent = IN_APP ? L().pvHintDl : L().pvHintSave;
 }
 
 function loadImg(src){
@@ -1329,9 +1358,21 @@ function plainDownload(fname){
   document.body.appendChild(a); a.click();
   setTimeout(()=>a.remove(), 1000);
 }
+const IS_IOS = /iPhone|iPad|iPod/i.test(UA);
+// In-app browsers (Facebook, Messenger...) can't save files made inside the page,
+// so the image is sent to the site's own server and opened as a real file link.
+async function serverDownload(){
+  const r = await fetch('/api/image', {method:'POST', headers:{'Content-Type':'image/png'}, body: currentBlob});
+  if(!r.ok) throw new Error('upload ' + r.status);
+  const j = await r.json();
+  const link = new URL(j.url, location.href);
+  if(!IS_IOS) link.searchParams.set('dl', '1');
+  location.href = link.toString();
+}
 $('dlBtn').addEventListener('click', async ()=>{
   if(!currentBlob) return;
   const fname = 'ghure-dekho-dhabi.png';
+  const btn = $('dlBtn');
   const dl = downloads || await withTimeout(dlPromise, 2500);
   if(dl){
     try{ await dl.save({filename:fname, data:currentBlob}); toast(L().saved); return; }
@@ -1341,6 +1382,13 @@ $('dlBtn').addEventListener('click', async ()=>{
       if(code==='rate_limited') return;
       downloads = null;
     }
+  }
+  if(IN_APP){
+    btn.disabled = true; btn.textContent = L().preparing;
+    try{ await serverDownload(); toast(IS_IOS ? L().iosSaveHint : L().dlStarted2); }
+    catch(e){ toast(L().dlFallback2); }
+    finally{ btn.disabled = false; btn.textContent = L().download; }
+    return;
   }
   try{ plainDownload(fname); }catch(e){}
   toast(L().dlStarted);
