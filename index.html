@@ -52,6 +52,8 @@ button,input{font:inherit;color:inherit}
 .hero{max-width:1200px;margin:0 auto;padding:18px 20px 0}
 .hero h1{margin:0;font-size:clamp(2.3rem,6.4vw,5rem);font-weight:800;font-stretch:125%;line-height:1.1;letter-spacing:-.012em;max-width:15ch}
 html[lang="en"] .hero h1{max-width:17ch}
+.visitors{display:inline-block;margin:14px 0 0;padding:6px 14px;border-radius:999px;background:var(--chip);color:var(--green);font-weight:600;font-size:.95rem}
+.visitors[hidden]{display:none}
 .lede{margin:16px 0 0;max-width:54ch;color:var(--muted);font-size:1.12rem}
 
 /* tool */
@@ -196,6 +198,7 @@ footer p{margin:0;max-width:70ch}
 <section class="hero">
   <h1 data-t="title">ঢাবির কতটুকু ঘুরে দেখেছেন?</h1>
   <p class="lede" data-t="lede"></p>
+  <p class="visitors" id="visitors" hidden></p>
 </section>
 
 <main class="tool">
@@ -512,7 +515,7 @@ const STR = {
     pvHint:'ছবিটিতে চেপে ধরে বা রাইট-ক্লিক করে সেভ করুন।',
     making:'ছবি তৈরি হচ্ছে…', saved:'ছবি ডাউনলোড হয়েছে', declined:'ডাউনলোড বাতিল হয়েছে',
     imgFail:'ছবি বানানো যায়নি। আবার চেষ্টা করুন।',
-    dockBtn:'মন্তব্য দেখুন', preparing:'ছবি তৈরি হচ্ছে…', dlStarted2:'ডাউনলোড শুরু হচ্ছে…', iosSaveHint:'ছবি খুলেছে; চেপে ধরে “Save to Photos” বেছে নিন।', dlFallback2:'ডাউনলোড করা গেল না। ছবিটিতে চেপে ধরে সেভ করুন।', womenNote:'দাগানো ব্লকগুলো ছাত্রী হল: সবসময় চিহ্নিত থাকে, বাছাই করা যায় না, পয়েন্টেও গোনা হয় না।', womenTip:'সবসময় চিহ্নিত, পয়েন্টে গোনা হয় না', maker:'Mahir Alvi Ridvi',
+    dockBtn:'মন্তব্য দেখুন', visitors:n=>`এ পর্যন্ত ${n} জন ক্যাম্পাস ঘুরে দেখেছেন`, preparing:'ছবি তৈরি হচ্ছে…', dlStarted2:'ডাউনলোড শুরু হচ্ছে…', iosSaveHint:'ছবি খুলেছে; চেপে ধরে “Save to Photos” বেছে নিন।', dlFallback2:'ডাউনলোড করা গেল না। ছবিটিতে চেপে ধরে সেভ করুন।', womenNote:'দাগানো ব্লকগুলো ছাত্রী হল: সবসময় চিহ্নিত থাকে, বাছাই করা যায় না, পয়েন্টেও গোনা হয় না।', womenTip:'সবসময় চিহ্নিত, পয়েন্টে গোনা হয় না', maker:'Mahir Alvi Ridvi',
     foot:'ঘুরে দেখো ঢাবি একটি মজার, অনানুষ্ঠানিক প্রজেক্ট; ঢাকা বিশ্ববিদ্যালয়ের সাথে এর কোনো আনুষ্ঠানিক সম্পর্ক নেই। ম্যাপটি OpenStreetMap-ভিত্তিক মানচিত্র অনুসরণ করে আঁকা (© OpenStreetMap contributors); কাছাকাছি জায়গার নাম দেখতে জুম করুন। ভাবনাটি Unseen Bangladesh থেকে অনুপ্রাণিত।',
     note:'ম্যাপ ডেটা © OpenStreetMap contributors', north:'উ',
     imgHead:(n,p)=>n?`${n} ঢাবির ${p}% ঘুরে দেখেছেন`:`ঢাবির ${p}% ঘুরে দেখেছি`,
@@ -541,7 +544,7 @@ const STR = {
     pvHint:'Long-press or right-click the image to save it.',
     making:'Making image…', saved:'Image downloaded', declined:'Download cancelled',
     imgFail:"Couldn't make the image. Try again.",
-    dockBtn:'See verdict', preparing:'Preparing image…', dlStarted2:'Starting download…', iosSaveHint:"Image opened; long-press it and choose 'Save to Photos'.", dlFallback2:"Couldn't download. Long-press the image to save it.", womenNote:"Striped blocks are women's halls: always marked, not selectable and not counted in your score.", womenTip:'always marked, not counted', maker:'Mahir Alvi Ridvi',
+    dockBtn:'See verdict', visitors:n=>`${n} people have explored the campus so far`, preparing:'Preparing image…', dlStarted2:'Starting download…', iosSaveHint:"Image opened; long-press it and choose 'Save to Photos'.", dlFallback2:"Couldn't download. Long-press the image to save it.", womenNote:"Striped blocks are women's halls: always marked, not selectable and not counted in your score.", womenTip:'always marked, not counted', maker:'Mahir Alvi Ridvi',
     foot:'Ghure Dekho DU is a just-for-fun, unofficial project with no official link to the University of Dhaka. The map is traced from an OpenStreetMap-based map (© OpenStreetMap contributors); zoom in to see the names of places that sit close together. Inspired by Unseen Bangladesh.',
     note:'Map data © OpenStreetMap contributors', north:'N',
     imgHead:(n,p)=>n?`${n} has seen ${p}% of DU`:`I've seen ${p}% of DU`,
@@ -1403,6 +1406,28 @@ $('shareBtn').addEventListener('click', async ()=>{
   catch(err){ if(!(err && err.name==='AbortError')) toast(L().shareFail); }
 });
 
+/* ---------- visitor counter (works on the Netlify site) ---------- */
+let visitorCount = null;
+function showVisitors(){
+  const el = $('visitors');
+  if(visitorCount === null){ el.hidden = true; return; }
+  el.textContent = L().visitors(fmt(visitorCount.toLocaleString('en-IN')));
+  el.hidden = false;
+}
+async function loadVisitors(){
+  let counted = false;
+  try{ counted = localStorage.getItem('gdd-counted') === '1'; }catch(e){}
+  try{
+    const r = await fetch('/api/visits', {method: counted ? 'GET' : 'POST', cache:'no-store'});
+    if(!r.ok) return;
+    const j = await r.json();
+    if(typeof j.count !== 'number') return;
+    visitorCount = j.count;
+    if(!counted){ try{ localStorage.setItem('gdd-counted','1'); }catch(e){} }
+    showVisitors();
+  }catch(e){}
+}
+
 /* ---------- render all ---------- */
 function renderAll(){
   const Ls = L();
@@ -1425,8 +1450,10 @@ function renderAll(){
   lastRank = null;
   update();
   syncDlBtn();
+  showVisitors();
 }
 renderAll();
+loadVisitors();
 })();
 </script>
 </body>
